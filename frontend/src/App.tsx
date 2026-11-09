@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import './App.css'
-import { Socket, io } from 'socket.io-client';
+import { io } from 'socket.io-client';
 import type { Player } from './interfaces/interfaces';
+import JoinRoomModal from './components/joinRoomModal';
 
 const socket = io('http://localhost:3000');
 
@@ -11,18 +12,27 @@ function App() {
   const [pin, setPin] = useState('')
   const [nickname, setNickname] = useState('');
   const [players, setPlayers] = useState<Player[]>([]);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isJoinRoomModalOpen, setIsJoinRoomModalOpen] = useState(false);
 
 
   const handleCreateRoom = () => {
+
+    if (!nickname) {
+      setErrorMessage('Please fill in your Nickname.');
+      return;
+    }
     socket.emit('create_room');
   };
 
   const handleJoinRoom = () => {
 
+    setIsJoinRoomModalOpen(true);
+
     console.log("oi")
 
     if (!pin || !nickname) {
-      alert('Preenche o PIN e o teu nome!');
+      setErrorMessage('Please fill in both PIN and Nickname.');
       return;
     }
 
@@ -51,43 +61,65 @@ function App() {
 
   return (
     <>
-      <div style={{ textAlign: 'center', marginTop: '3rem' }}>
-        {!pin ? (
-          <button onClick={handleCreateRoom}>Criar Sala</button>
-        ) : (
-          <div>
-            <h2>PIN da Sala:</h2>
-            <h1 style={{ fontSize: '3rem', letterSpacing: '4px' }}>{pin}</h1>
-            <p>A aguardar jogadores...</p>
+      <div className='flex min-h-screen w-full items-center justify-center flex-col'>
+        <div className='flex flex-col items-center justify-center gap-4 border-2 p-4 rounded-lg w-1/3 h-80 bg-gray-800'>
+          <div className='flex' >
+            <span>
+              Nickname: <input
+                type="text"
+                placeholder="Your Nickname.."
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+              /></span></div>
+          <div className='flex'>
+
+            {!pin ? (
+              <div className='flex gap-5'>
+                <button className='border-2 rounded-4xl p-3 hover:cursor-pointer' onClick={handleCreateRoom}>Criar Sala</button>
+                <button className='border-2 rounded-4xl p-3 hover:cursor-pointer' onClick={handleJoinRoom}>Join room</button>
+              </div>
+            ) : (
+              <div>
+                <h2>PIN da Sala:</h2>
+                <h1 >{pin}</h1>
+                <p>A aguardar jogadores...</p>
+              </div>
+            )}
           </div>
-        )}
+
+          {isJoinRoomModalOpen && <JoinRoomModal isOpen={isJoinRoomModalOpen}
+            onClose={() => setIsJoinRoomModalOpen(false)} />}
+
+
+          {errorMessage ? (<p className='text-red-500'>{errorMessage}</p>) : null}
+          {/* 
+          <input
+            type="text"
+            placeholder="O teu Nickname"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+          />
+
+                      <input
+              type="text"
+              placeholder="PIN (ex: 4821)"
+              value={pin}
+              onChange={(e) => setPin(e.target.value)}
+            /> 
+          <div>
+            <h3>Jogadores na sala ({players.length}):</h3>
+            <ul>
+              {players.map((player) => (
+                <li key={player.id}>{player.nickname}</li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <button onClick={handleJoinRoom}>Join room</button>
+          </div> */}
+        </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxWidth: '250px' }}>
-        <input
-          type="text"
-          placeholder="PIN (ex: 4821)"
-          value={pin}
-          onChange={(e) => setPin(e.target.value)}
-        /> </div>
-      <input
-        type="text"
-        placeholder="O teu Nickname"
-        value={nickname}
-        onChange={(e) => setNickname(e.target.value)}
-      />
-
-      <div>
-        <h3>Jogadores na sala ({players.length}):</h3>
-        <ul>
-          {players.map((player) => (
-            <li key={player.id}>{player.nickname}</li>
-          ))}
-        </ul>
-      </div>
-      <div>
-        <button onClick={handleJoinRoom}>Join room</button>
-      </div>
     </>
   )
 }
