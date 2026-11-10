@@ -3,14 +3,24 @@ import { useState } from 'react'
 interface JoinRoomModalProps {
     isOpen: boolean;
     onClose: () => void;
-    // onJoin: (pin: string, nickname: string) => void;
+    nickname: string;
+    onJoin: (pin: string, nickname: string) => void;
 }
 
-export default function JoinRoomModal({ isOpen, onClose }: JoinRoomModalProps) {
+
+
+
+export default function JoinRoomModal({ isOpen, onClose, onJoin, nickname }: JoinRoomModalProps) {
 
     const [pin, setPin] = useState('')
 
+
     if (!isOpen) return null;
+
+    const handleJoin = () => {
+        onJoin(pin, nickname);
+        onClose(); // Close the modal after joining
+    }
 
     return (
         <>
@@ -32,10 +42,11 @@ export default function JoinRoomModal({ isOpen, onClose }: JoinRoomModalProps) {
                             ✕
                         </button>
                     </div>
-                    <div>
+                    <div className="flex flex-col gap-4 align-center justify-center items-center">
                         <h1>Join Room</h1>
                         <input type="text" placeholder="Enter PIN" value={pin} onChange={(e) => setPin(e.target.value)} />
-                        <button>Join</button>
+                        {/* <h2>{pin}</h2> */}
+                        <button className='bg-slate-900 border rounded-2xl w-28 hover:bg-slate-600 cursor-pointer' onClick={handleJoin}>Join</button>
                     </div>
                 </div>
             </div>

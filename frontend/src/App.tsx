@@ -25,19 +25,26 @@ function App() {
     socket.emit('create_room');
   };
 
-  const handleJoinRoom = () => {
-
+  const openJoinRoomModal = () => {
+    if (!nickname) {
+      setErrorMessage('Please fill in your Nickname.');
+      return;
+    }
     setIsJoinRoomModalOpen(true);
+  };
 
-    console.log("oi")
+  const handleJoinRoom = (pinFromModal: string, nickname: string) => {
 
-    if (!pin || !nickname) {
+
+    console.log("oi", nickname, pinFromModal)
+
+    if (!nickname) {
       setErrorMessage('Please fill in both PIN and Nickname.');
       return;
     }
 
-    socket.emit('join_room', { pin: pin, nickname: nickname });
-    console.log(`Tentando entrar na sala com PIN: ${pin} e Nickname: ${nickname}`);
+    socket.emit('join_room', { pin: pinFromModal, nickname: nickname });
+    console.log(`Tentando entrar na sala com PIN: ${pinFromModal} e Nickname: ${nickname}`);
   }
 
   useEffect(() => {
@@ -76,19 +83,20 @@ function App() {
             {!pin ? (
               <div className='flex gap-5'>
                 <button className='border-2 rounded-4xl p-3 hover:cursor-pointer' onClick={handleCreateRoom}>Criar Sala</button>
-                <button className='border-2 rounded-4xl p-3 hover:cursor-pointer' onClick={handleJoinRoom}>Join room</button>
+                <button className='border-2 rounded-4xl p-3 hover:cursor-pointer' onClick={openJoinRoomModal}>Join room</button>
               </div>
             ) : (
               <div>
                 <h2>PIN da Sala:</h2>
                 <h1 >{pin}</h1>
+                <h3>Jogadores na sala ({players.length}):</h3>
                 <p>A aguardar jogadores...</p>
               </div>
             )}
           </div>
 
           {isJoinRoomModalOpen && <JoinRoomModal isOpen={isJoinRoomModalOpen}
-            onClose={() => setIsJoinRoomModalOpen(false)} />}
+            onClose={() => setIsJoinRoomModalOpen(false)} nickname={nickname} onJoin = {handleJoinRoom}/>}
 
 
           {errorMessage ? (<p className='text-red-500'>{errorMessage}</p>) : null}
