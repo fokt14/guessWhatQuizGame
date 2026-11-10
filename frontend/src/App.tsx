@@ -13,6 +13,7 @@ function App() {
   const [nickname, setNickname] = useState('');
   const [players, setPlayers] = useState<Player[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
+  const [stateOfPlayer, setStateOfPlayer] = useState<string>();
   const [isJoinRoomModalOpen, setIsJoinRoomModalOpen] = useState(false);
 
 
@@ -22,7 +23,7 @@ function App() {
       setErrorMessage('Please fill in your Nickname.');
       return;
     }
-    socket.emit('create_room');
+    socket.emit('create_room', { nickname: nickname });
   };
 
   const openJoinRoomModal = () => {
@@ -44,12 +45,14 @@ function App() {
     }
 
     socket.emit('join_room', { pin: pinFromModal, nickname: nickname });
+    setStateOfPlayer('JOINED');
     console.log(`Tentando entrar na sala com PIN: ${pinFromModal} e Nickname: ${nickname}`);
   }
 
   useEffect(() => {
-    socket.on('room_created', (data: { pin: string }) => {
+    socket.on('room_created', (data: { pin: string, players: Player[] }) => {
       console.log('Chegou ao cliente!', data);
+      setPlayers(data.players);
       setPin(data.pin);
     });
 
@@ -84,6 +87,8 @@ function App() {
               <div className='flex gap-5'>
                 <button className='border-2 rounded-4xl p-3 hover:cursor-pointer' onClick={handleCreateRoom}>Criar Sala</button>
                 <button className='border-2 rounded-4xl p-3 hover:cursor-pointer' onClick={openJoinRoomModal}>Join room</button>
+
+                {stateOfPlayer === 'JOINED' ? (<p>Você entrou na sala com sucesso!</p>) : null}
               </div>
             ) : (
               <div>
@@ -96,7 +101,7 @@ function App() {
           </div>
 
           {isJoinRoomModalOpen && <JoinRoomModal isOpen={isJoinRoomModalOpen}
-            onClose={() => setIsJoinRoomModalOpen(false)} nickname={nickname} onJoin = {handleJoinRoom}/>}
+            onClose={() => setIsJoinRoomModalOpen(false)} nickname={nickname} onJoin={handleJoinRoom} />}
 
 
           {errorMessage ? (<p className='text-red-500'>{errorMessage}</p>) : null}

@@ -24,12 +24,12 @@ function generatePIN() {
 io.on("connection", (socket) => {
   console.log(`Novo cliente conectado! ID: ${socket.id}`);
 
-  socket.on("create_room", () => {
+  socket.on("create_room", (data) => {
     const pin = generatePIN();
 
     rooms[pin] = {
       hostId: socket.id,
-      players: [],
+      players: [{ id: socket.id, nickname: data.nickname, state: "HOST" }],
       status: "LOBBY",
     };
 
@@ -37,7 +37,7 @@ io.on("connection", (socket) => {
 
     console.log(`Sala criada com o PIN: ${pin} pelo host: ${socket.id}`);
 
-    socket.emit("room_created", { pin });
+    socket.emit("room_created", { pin, players: rooms[pin].players });
   });
 
   socket.on("join_room", (data) => {
@@ -47,7 +47,11 @@ io.on("connection", (socket) => {
     }
 
     socket.data.pin = data.pin;
-    rooms[data.pin].players.push({ id: socket.id, nickname: data.nickname });
+    rooms[data.pin].players.push({
+      id: socket.id,
+      nickname: data.nickname,
+      state: "PLAYER",
+    });
     socket.join(data.pin);
 
     console.log(
