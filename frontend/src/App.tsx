@@ -18,6 +18,7 @@ function App() {
 
 
   const handleCreateRoom = () => {
+    setErrorMessage('');
 
     if (!nickname) {
       setErrorMessage('Please fill in your Nickname.');
@@ -36,6 +37,8 @@ function App() {
 
   const handleJoinRoom = (pinFromModal: string, nickname: string) => {
 
+    setErrorMessage('');
+
 
     console.log("oi", nickname, pinFromModal)
 
@@ -47,6 +50,10 @@ function App() {
     socket.emit('join_room', { pin: pinFromModal, nickname: nickname });
     setStateOfPlayer('JOINED');
     console.log(`Tentando entrar na sala com PIN: ${pinFromModal} e Nickname: ${nickname}`);
+  }
+
+  const handleStartGame = () => {
+    socket.emit('start_game', { pin: pin });
   }
 
   useEffect(() => {
@@ -72,9 +79,9 @@ function App() {
   return (
     <>
       <div className='flex min-h-screen w-full items-center justify-center flex-col'>
-        <div className='flex flex-col items-center justify-center gap-4 border-2 p-4 rounded-lg w-1/3 h-80 bg-gray-800'>
-          <div className='flex' >
-            <span>
+        <div className='flex flex-col items-center justify-center gap-4 border-2 border-black p-4 rounded-lg w-1/3 h-80 bg-blue-200'>
+          <div className='flex ' >
+            <span className='flex gap-2 items-center justify-center font-bold'>
               Nickname: <input
                 type="text"
                 placeholder="Your Nickname.."
@@ -84,18 +91,24 @@ function App() {
           <div className='flex'>
 
             {!pin ? (
-              <div className='flex gap-5'>
-                <button className='border-2 rounded-4xl p-3 hover:cursor-pointer' onClick={handleCreateRoom}>Criar Sala</button>
-                <button className='border-2 rounded-4xl p-3 hover:cursor-pointer' onClick={openJoinRoomModal}>Join room</button>
-
-                {stateOfPlayer === 'JOINED' ? (<p>Você entrou na sala com sucesso!</p>) : null}
+              <div className='flex flex-col gap-5'>
+                <div className='flex flex-row gap-5'>
+                  <button className='border-2 rounded-4xl p-3 hover:bg-blue-400 cursor-pointer' onClick={handleCreateRoom}>Create room</button>
+                  <button className='border-2 rounded-4xl p-3 hover:bg-blue-400 cursor-pointer' onClick={openJoinRoomModal}>Join room</button>
+                </div>
+                {stateOfPlayer === 'JOINED' ? (<p>Your are in the room!</p>) : null}
               </div>
             ) : (
-              <div>
-                <h2>PIN da Sala:</h2>
+              <div className='flex flex-col gap-2 items-center justify-center'>
+                <h2 className='font-bold'>Room PIN:</h2>
                 <h1 >{pin}</h1>
-                <h3>Jogadores na sala ({players.length}):</h3>
-                <p>A aguardar jogadores...</p>
+                <h3 className='font-bold'>Players in the room ({players.length}):</h3>
+                <ul>
+                  {players.map((player) => (
+                    <li key={player.id}>{player.nickname}</li>
+                  ))}
+                </ul>
+                <button onClick={handleStartGame} className='border-2 rounded-4xl p-3 hover:bg-blue-400 cursor-pointer mt-2'>Start game</button>
               </div>
             )}
           </div>
