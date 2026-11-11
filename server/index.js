@@ -1,7 +1,11 @@
+import questions from "./questions";
+
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
+
+const questions = require("./questions");
 
 const app = express();
 app.use(cors());
@@ -19,6 +23,35 @@ const io = new Server(server, {
 
 function generatePIN() {
   return Math.floor(1000 + Math.random() * 9000).toString();
+}
+
+function sendQuestion(pin) {
+  const room = rooms[pin];
+  const currentQ = questions[room.currentQuestionIndex];
+
+  if (!room) return;
+
+  if (!currentQ) {
+    room.state = "GAME_OVER";
+    return io.to(pin).emit("game_over", { message: "Jogo terminado!" });
+  }
+
+  const questionToSend = {
+    questionIndex: room.currentQuestionIndex,
+    totalQuestions: questions.length,
+    question: currentQ.question,
+    answers: currentQ.answers,
+  };
+
+  io.to(pin).emit("new_question", questionToSend);
+}
+
+function nextQuestion(pin) {
+  const room = rooms[pin];
+  if (!room) return;
+
+  room.currentQuestionIndex++;
+  sendQuestion(pin);
 }
 
 io.on("connection", (socket) => {
@@ -58,6 +91,27 @@ io.on("connection", (socket) => {
       `Cliente ${socket.id} entrou na sala com PIN: ${data.pin} e Nickname: ${data.nickname}`,
     );
     io.to(data.pin).emit("update_players", rooms[data.pin].players);
+  });
+
+  socket.on("start_game", (data) => {
+    console.log("Started gmae", data);
+
+    if (!rooms[data.pin]) {
+      return socket.emit("error", "Room doesn't existe");
+    }
+
+    if (socket.id !== rooms[data.pin].hostId) {
+      return socket.emit("error", "Id from host is not the same for this room");
+    }
+
+    if (rooms[data.pin].players.length <= 0) {
+      return socket.emit("error", "No players enough to start");
+    }
+
+    rooms[data.pin].status = "IN_GAME";
+    rooms[data.pin].currentQuestionIndex = 0;
+
+    sendQuestion(data.pin);
   });
 
   socket.on("disconnect", () => {
