@@ -49,6 +49,10 @@ function nextQuestion(pin) {
   const room = rooms[pin];
   if (!room) return;
 
+  for (let player of room.players) {
+    player.hasAlreadyAnswered = false;
+  }
+
   room.currentQuestionIndex++;
   sendQuestion(pin);
 }
@@ -65,7 +69,7 @@ io.on("connection", (socket) => {
         {
           id: socket.id,
           nickname: data.nickname,
-          rule: "HOST",
+          role: "HOST",
           hasAlreadyAnswered: false,
           points: 0,
         },
@@ -86,11 +90,11 @@ io.on("connection", (socket) => {
       return socket.emit("error", "Sala nao existe");
     }
 
-    socket.data.pin = data.pin;
+    socket.pin = data.pin;
     rooms[data.pin].players.push({
       id: socket.id,
       nickname: data.nickname,
-      rule: "PLAYER",
+      role: "PLAYER",
       hasAlreadyAnswered: false,
       points: 0,
     });
@@ -158,17 +162,24 @@ io.on("connection", (socket) => {
       (player) => player.hasAlreadyAnswered,
     );
 
+    let isLastQuestion = room.currentQuestionIndex === questions.length - 1;
+
     if (playersAlreadyAnswered.length === room.players.length) {
       console.log("Ja todos resopodenream", playersAlreadyAnswered);
-      
-      io.to(data.pin).emit("round_finished", room.players);
+
+      io.to(data.pin).emit("round_finished",  room.players, isLastQuestion);
     }
+  });
+
+  socket.on("next_question_in_game", (data) => {
+    console.log("NEXT QUESTION", data);
+    nextQuestion(data.pin);
   });
 
   socket.on("disconnect", () => {
     console.log(`Cliente desconectado: ${socket.id}`);
 
-    const pin = socket.data.pin;
+    const pin = socket.pin;
 
     if (!pin || !rooms[pin]) {
       console.log("Nao existe nada");

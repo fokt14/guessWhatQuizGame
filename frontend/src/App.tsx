@@ -20,6 +20,7 @@ function App() {
   const [stateOfPlayer, setStateOfPlayer] = useState<GameState>('MENU'); // MENU, LOBBY_HOST, LOBBY_PLAYER, IN_GAME, GAME_OVER
   const [isJoinRoomModalOpen, setIsJoinRoomModalOpen] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<Question>();
+  const [isLastQuestion, setIsLastQuestion] = useState(false);
 
 
   const handleCreateRoom = () => {
@@ -69,6 +70,11 @@ function App() {
     socket.emit('submit_answer', { pin: pin, answerIndex: selectedAnswerIndex });
   }
 
+  const handleNextQuestion = () => {
+    socket.emit('next_question_in_game', { pin: pin });
+  }
+
+  //UseEffect to listen for socket events and update state accordingly
   useEffect(() => {
     socket.on('room_created', (data: { pin: string, players: Player[] }) => {
       console.log('Chegou ao cliente!', data);
@@ -87,9 +93,10 @@ function App() {
       setCurrentQuestion(question);
     });
 
-    socket.on("round_finished", (players: Player[]) => {
+    socket.on("round_finished", (players: Player[], isLastQuestion : boolean) => {
       console.log("PLAYERS :", players);
       setPlayers(players);
+      setIsLastQuestion(isLastQuestion);
       setStateOfPlayer('ROUND_RESULTS');
     });
 
@@ -109,7 +116,10 @@ function App() {
   }
 
   if (stateOfPlayer === 'ROUND_RESULTS') {
-    return <LeaderBoardScreen playersList={players} />
+    const myPlayer = players.find(player => player.id === socket.id);
+    const myRole = myPlayer ? myPlayer.role : null;
+
+    return <LeaderBoardScreen playersList={players} myRole={myRole} onNextQuestion={handleNextQuestion} isLastQuestion={isLastQuestion} />
   }
 
   if (stateOfPlayer === 'LOBBY_PLAYER') {

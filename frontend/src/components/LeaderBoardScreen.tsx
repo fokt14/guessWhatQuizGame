@@ -2,11 +2,18 @@ import type { Player } from "../interfaces/interfaces";
 
 interface LeaderBoardScreenProps {
     playersList: Player[];
+    myRole: "HOST" | "PLAYER" | null;
+    onNextQuestion: () => void;
+    isLastQuestion: boolean;
 }
 
-export default function LeaderBoardScreen({ playersList }: LeaderBoardScreenProps) {
+export default function LeaderBoardScreen({ playersList, myRole, onNextQuestion, isLastQuestion }: LeaderBoardScreenProps) {
 
     const sortedPlayers = [...playersList].sort((a, b) => b.points - a.points);
+
+    const handleNextQuestion = () => {
+        onNextQuestion();
+    }
 
     return (
         <div className="w-full min-h-screen flex flex-col items-center justify-center p-4">
@@ -42,6 +49,17 @@ export default function LeaderBoardScreen({ playersList }: LeaderBoardScreenProp
                     </div>
                 ))}
             </div>
+
+            {myRole === "HOST" || !isLastQuestion && (
+                <button
+                    onClick={handleNextQuestion}
+                    className="mt-10 bg-slate-900 text-white px-6 py-3 rounded-2xl text-xl font-bold hover:bg-slate-600 transition-colors"
+                >
+                    Next Question
+                </button>
+            )}
+
+            {/* TODO: SE O JOGO ACABOU, MOSTRAR BOTÃO DE VOLTAR PARA O MENU */}
         </div>
     );
 }
