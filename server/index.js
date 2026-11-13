@@ -1,11 +1,9 @@
-import questions from "./questions";
+import questions from "./questions.js";
 
-const express = require("express");
-const http = require("http");
-const { Server } = require("socket.io");
-const cors = require("cors");
-
-const questions = require("./questions");
+import express from "express";
+import http from "http";
+import { Server } from "socket.io";
+import cors from "cors";
 
 const app = express();
 app.use(cors());

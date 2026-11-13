@@ -1,4 +1,4 @@
-export default questions = [
+const questions = [
   {
     question: "Qual é a capital de Portugal?",
     answers: ["Lisboa", "Nazaré", "Peniche", "Leiria"],
@@ -10,3 +10,6 @@ export default questions = [
     correctIndex: 2,
   },
 ];
+
+
+export default questions;
