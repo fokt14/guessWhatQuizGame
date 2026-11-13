@@ -1,4 +1,4 @@
-import type {Question} from "../interfaces/interfaces";
+import type { Question } from "../interfaces/interfaces";
 import { useState, useEffect } from "react";
 
 
@@ -22,13 +22,6 @@ export default function GameScreen({ currentQuestion, onAnswerSubmitted }: GameS
         }
 
         setHasAnswered(true);
-
-        if (index === currentQuestion.correctAnswerIndex) {
-            console.log("Correct answer!");
-        } else {
-            console.log("Wrong answer!");
-        }
-
         onAnswerSubmitted(index);
     }
 
@@ -37,6 +30,9 @@ export default function GameScreen({ currentQuestion, onAnswerSubmitted }: GameS
             setTimeLeft(prevTime => {
                 if (prevTime <= 1) {
                     clearInterval(timerId);
+                    if (!hasAnswered) {
+                        onAnswerSubmitted(-1);
+                    }
                     return 0;
                 }
                 return prevTime - 1;
@@ -58,7 +54,7 @@ export default function GameScreen({ currentQuestion, onAnswerSubmitted }: GameS
                     <h1 className="text-4xl md:text-5xl font-black text-black">{currentQuestion.question}</h1>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl mt-4">
-                    {currentQuestion.answers.map((answer : string, index : number) => (
+                    {currentQuestion.answers.map((answer: string, index: number) => (
                         <button
                             key={index}
                             onClick={() => handleAnswer(index)}
