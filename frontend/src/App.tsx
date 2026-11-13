@@ -3,6 +3,10 @@ import './App.css'
 import { io } from 'socket.io-client';
 import type { Player } from './interfaces/interfaces';
 import JoinRoomModal from './components/joinRoomModal';
+import GameScreen from './components/GameScreen';
+import type Question from './interfaces/interfaces';
+import type { GameState } from './interfaces/enums';
+
 
 const socket = io('http://localhost:3000');
 
@@ -13,8 +17,9 @@ function App() {
   const [nickname, setNickname] = useState('');
   const [players, setPlayers] = useState<Player[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
-  const [stateOfPlayer, setStateOfPlayer] = useState<string>();
+  const [stateOfPlayer, setStateOfPlayer] = useState<GameState>('MENU'); // MENU, LOBBY_HOST, LOBBY_PLAYER, IN_GAME, GAME_OVER
   const [isJoinRoomModalOpen, setIsJoinRoomModalOpen] = useState(false);
+  const [currentQuestion, setCurrentQuestion] = useState<Question>();
 
 
   const handleCreateRoom = () => {
@@ -24,7 +29,9 @@ function App() {
       setErrorMessage('Please fill in your Nickname.');
       return;
     }
+
     socket.emit('create_room', { nickname: nickname });
+    setStateOfPlayer('LOBBY_HOST');
   };
 
   const openJoinRoomModal = () => {
@@ -48,7 +55,8 @@ function App() {
     }
 
     socket.emit('join_room', { pin: pinFromModal, nickname: nickname });
-    setStateOfPlayer('JOINED');
+    setStateOfPlayer('LOBBY_PLAYER');
+    setPin(pinFromModal);
     console.log(`Tentando entrar na sala com PIN: ${pinFromModal} e Nickname: ${nickname}`);
   }
 
@@ -68,90 +76,97 @@ function App() {
       setPlayers(updatedList);
     });
 
-    socket.on("new_question", (question : any) => {
+    socket.on("new_question", (question: any) => {
       console.log("QUESTAO:", question);
+      setStateOfPlayer('IN_GAME');
+      setCurrentQuestion(question);
     });
 
     return () => {
       socket.off('room_created');
       socket.off("update_players");
+      socket.off("new_question");
     };
 
 
   }, []);
 
+  //RETURNING UI BASED ON STATE OF PLAYER
+
+  if (stateOfPlayer === 'IN_GAME' && currentQuestion) {
+    return <GameScreen currentQuestion={currentQuestion} />;
+  }
+
+  if (stateOfPlayer === 'LOBBY_PLAYER') {
+    return (
+      <div className="flex min-h-screen items-center justify-center  text-white flex-col gap-4">
+        <div className="flex flex-col items-center justify-center gap-4 border-2 border-black text-black p-4 rounded-lg w-1/3 min-h-80 bg-blue-200">
+          <h1 className="text-3xl font-bold">You are in! </h1>
+          <p className="text-xl text-slate-400">Wait for the host...</p>
+          <h2 className="text-2xl font-semibold">Room PIN: {pin}</h2>
+          <h3 className="text-xl font-semibold">Players in the room ({players.length}):</h3>
+          <ul className="flex flex-wrap gap-2 justify-center">
+            {players.map((player) => (
+              <li key={player.id} className="bg-white text-black px-3 py-1 rounded-full text-sm font-semibold">{player.nickname}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    );
+  }
+
+  // RETURNING UI FOR MENU AND LOBBY HOST STATES
   return (
     <>
       <div className='flex min-h-screen w-full items-center justify-center flex-col'>
-        <div className='flex flex-col items-center justify-center gap-4 border-2 border-black p-4 rounded-lg w-1/3 h-80 bg-blue-200'>
-          <div className='flex ' >
+        <div className='flex flex-col items-center justify-center gap-4 border-2 border-black p-4 rounded-lg w-1/3 min-h-80 bg-blue-200'>
+
+          <div className='flex' >
             <span className='flex gap-2 items-center justify-center font-bold'>
               Nickname: <input
                 type="text"
                 placeholder="Your Nickname.."
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
-              /></span></div>
-          <div className='flex'>
-
-            {!pin ? (
-              <div className='flex flex-col gap-5'>
-                <div className='flex flex-row gap-5'>
-                  <button className='border-2 rounded-4xl p-3 hover:bg-blue-400 cursor-pointer' onClick={handleCreateRoom}>Create room</button>
-                  <button className='border-2 rounded-4xl p-3 hover:bg-blue-400 cursor-pointer' onClick={openJoinRoomModal}>Join room</button>
-                </div>
-                {stateOfPlayer === 'JOINED' ? (<p>Your are in the room!</p>) : null}
-              </div>
-            ) : (
-              <div className='flex flex-col gap-2 items-center justify-center'>
-                <h2 className='font-bold'>Room PIN:</h2>
-                <h1 >{pin}</h1>
-                <h3 className='font-bold'>Players in the room ({players.length}):</h3>
-                <ul>
-                  {players.map((player) => (
-                    <li key={player.id}>{player.nickname}</li>
-                  ))}
-                </ul>
-                <button onClick={handleStartGame} className='border-2 rounded-4xl p-3 hover:bg-blue-400 cursor-pointer mt-2'>Start game</button>
-              </div>
-            )}
+              />
+            </span>
           </div>
 
-          {isJoinRoomModalOpen && <JoinRoomModal isOpen={isJoinRoomModalOpen}
-            onClose={() => setIsJoinRoomModalOpen(false)} nickname={nickname} onJoin={handleJoinRoom} />}
+          {!pin ? (
+            <div className='flex flex-col gap-5 mt-4'>
+              <div className='flex flex-row gap-5'>
+                <button className='border-2 rounded-4xl p-3 hover:bg-blue-400 cursor-pointer' onClick={handleCreateRoom}>Create room</button>
+                <button className='border-2 rounded-4xl p-3 hover:bg-blue-400 cursor-pointer' onClick={openJoinRoomModal}>Join room</button>
+              </div>
+            </div>
+          ) : (
+            <div className='flex flex-col gap-2 items-center justify-center mt-4'>
+              <h2 className='font-bold'>Room PIN:</h2>
+              <h1 className='text-4xl font-black'>{pin}</h1>
+              <h3 className='font-bold mt-4'>Players in the room ({players.length}):</h3>
+              <ul className='flex flex-wrap gap-2 justify-center'>
+                {players.map((player) => (
+                  <li key={player.id} className='bg-white px-3 py-1 rounded-full text-sm font-semibold'>{player.nickname}</li>
+                ))}
+              </ul>
+              <button onClick={handleStartGame} className='border-2 bg-green-500 text-white font-bold rounded-4xl p-3 hover:bg-green-600 cursor-pointer mt-4'>Start game</button>
+            </div>
+          )}
 
-
-          {errorMessage ? (<p className='text-red-500'>{errorMessage}</p>) : null}
-          {/* 
-          <input
-            type="text"
-            placeholder="O teu Nickname"
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-          />
-
-                      <input
-              type="text"
-              placeholder="PIN (ex: 4821)"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-            /> 
-          <div>
-            <h3>Jogadores na sala ({players.length}):</h3>
-            <ul>
-              {players.map((player) => (
-                <li key={player.id}>{player.nickname}</li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <button onClick={handleJoinRoom}>Join room</button>
-          </div> */}
+          {errorMessage ? (<p className='text-red-500 font-bold mt-2'>{errorMessage}</p>) : null}
         </div>
       </div>
 
+      {isJoinRoomModalOpen && (
+        <JoinRoomModal
+          isOpen={isJoinRoomModalOpen}
+          onClose={() => setIsJoinRoomModalOpen(false)}
+          nickname={nickname}
+          onJoin={handleJoinRoom}
+        />
+      )}
     </>
-  )
+  );
 }
 
 export default App

@@ -1,0 +1,6 @@
+export type GameState = 
+  | "MENU" // In the menu, before joining or creating a room
+  | "LOBBY_HOST"  // In the lobby, waiting for players to join (host)
+  | "LOBBY_PLAYER" // In the lobby, waiting for players to join (player)
+  | "IN_GAME"  // In the game, answering questions
+  | "GAME_OVER"; // Game has ended, showing results
