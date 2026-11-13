@@ -5,6 +5,7 @@ import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 
+
 const app = express();
 app.use(cors());
 
@@ -39,6 +40,7 @@ function sendQuestion(pin) {
     totalQuestions: questions.length,
     question: currentQ.question,
     answers: currentQ.answers,
+    correctAnswerIndex: currentQ.correctIndex,
   };
 
   io.to(pin).emit("new_question", questionToSend);
@@ -60,8 +62,8 @@ io.on("connection", (socket) => {
 
     rooms[pin] = {
       hostId: socket.id,
-      players: [{ id: socket.id, nickname: data.nickname, state: "HOST" }],
-      status: "LOBBY",
+      players: [{ id: socket.id, nickname: data.nickname, rule: "HOST" }],
+      state: "LOBBY_HOST",
     };
 
     socket.join(pin);
@@ -81,7 +83,7 @@ io.on("connection", (socket) => {
     rooms[data.pin].players.push({
       id: socket.id,
       nickname: data.nickname,
-      state: "PLAYER",
+      rule: "PLAYER",
     });
     socket.join(data.pin);
 
@@ -95,7 +97,7 @@ io.on("connection", (socket) => {
     console.log("Started gmae", data);
 
     if (!rooms[data.pin]) {
-      return socket.emit("error", "Room doesn't existe");
+      return socket.emit("error", "Room doesn't exist");
     }
 
     if (socket.id !== rooms[data.pin].hostId) {
@@ -106,7 +108,7 @@ io.on("connection", (socket) => {
       return socket.emit("error", "No players enough to start");
     }
 
-    rooms[data.pin].status = "IN_GAME";
+    rooms[data.pin].state = "IN_GAME";
     rooms[data.pin].currentQuestionIndex = 0;
 
     sendQuestion(data.pin);
