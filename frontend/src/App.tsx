@@ -68,6 +68,10 @@ function App() {
       setPlayers(updatedList);
     });
 
+    socket.on("new_question", (question : any) => {
+      console.log("QUESTAO:", question);
+    });
+
     return () => {
       socket.off('room_created');
       socket.off("update_players");
