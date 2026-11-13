@@ -1,9 +1,11 @@
-export interface Player {
+export  interface Player {
   id: string;
   nickname: string;
+  hasAlreadyAnswered: boolean,
+  points: number;
 }
 
-export default interface Question {
+export  interface Question {
   question: string;
   answers: string[];
   correctAnswerIndex: number;

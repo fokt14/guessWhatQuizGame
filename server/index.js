@@ -5,7 +5,6 @@ import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 
-
 const app = express();
 app.use(cors());
 
@@ -62,7 +61,15 @@ io.on("connection", (socket) => {
 
     rooms[pin] = {
       hostId: socket.id,
-      players: [{ id: socket.id, nickname: data.nickname, rule: "HOST" }],
+      players: [
+        {
+          id: socket.id,
+          nickname: data.nickname,
+          rule: "HOST",
+          hasAlreadyAnswered: false,
+          points: 0,
+        },
+      ],
       state: "LOBBY_HOST",
     };
 
@@ -84,6 +91,8 @@ io.on("connection", (socket) => {
       id: socket.id,
       nickname: data.nickname,
       rule: "PLAYER",
+      hasAlreadyAnswered: false,
+      points: 0,
     });
     socket.join(data.pin);
 
@@ -112,6 +121,48 @@ io.on("connection", (socket) => {
     rooms[data.pin].currentQuestionIndex = 0;
 
     sendQuestion(data.pin);
+  });
+
+  socket.on("submit_answer", (data) => {
+    if (!rooms[data.pin]) {
+      console.log("Wrong room");
+      return;
+    }
+    console.log("SUBMITE _ASNE", data);
+
+    let room = rooms[data.pin];
+
+    let myPlayer = room.players.find((player) => player.id == socket.id);
+
+    if (!myPlayer) {
+      console.log("VAIDAS Ddwasdaw");
+      return;
+    }
+
+    if (myPlayer.hasAlreadyAnswered) {
+      console.log("YOU ALREADY SUBMITED YOU ANSWERS ASSHOLE");
+      return;
+    }
+
+    const currentQ = questions[room.currentQuestionIndex];
+
+    if (currentQ.correctIndex == data.answerIndex) {
+      console.log("CARLADHWA");
+      myPlayer.points += 100;
+      console.log("MY_POINTS", myPlayer.points);
+    }
+
+    myPlayer.hasAlreadyAnswered = true;
+
+    let playersAlreadyAnswered = room.players.filter(
+      (player) => player.hasAlreadyAnswered,
+    );
+
+    if (playersAlreadyAnswered.length === room.players.length) {
+      console.log("Ja todos resopodenream", playersAlreadyAnswered);
+      
+      io.to(data.pin).emit("round_finished", room.players);
+    }
   });
 
   socket.on("disconnect", () => {

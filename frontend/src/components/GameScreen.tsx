@@ -1,25 +1,35 @@
-import type Question from "../interfaces/interfaces";
+import type {Question} from "../interfaces/interfaces";
 import { useState, useEffect } from "react";
 
 
 interface GameScreenProps {
     currentQuestion: Question;
+    onAnswerSubmitted: (selectedAnswerIndex: number) => void;
 }
 
 
 
-export default function GameScreen({ currentQuestion }: GameScreenProps) {
+export default function GameScreen({ currentQuestion, onAnswerSubmitted }: GameScreenProps) {
 
     const [timeLeft, setTimeLeft] = useState(15);
+    const [hasAnswered, setHasAnswered] = useState(false);
 
     const handleAnswer = (index: number): void => {
         console.log(`Selected answer: ${index}`);
+
+        if (hasAnswered) {
+            return;
+        }
+
+        setHasAnswered(true);
 
         if (index === currentQuestion.correctAnswerIndex) {
             console.log("Correct answer!");
         } else {
             console.log("Wrong answer!");
         }
+
+        onAnswerSubmitted(index);
     }
 
     useEffect(() => {
@@ -48,11 +58,11 @@ export default function GameScreen({ currentQuestion }: GameScreenProps) {
                     <h1 className="text-4xl md:text-5xl font-black text-black">{currentQuestion.question}</h1>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl mt-4">
-                    {currentQuestion.answers.map((answer, index) => (
+                    {currentQuestion.answers.map((answer : string, index : number) => (
                         <button
                             key={index}
                             onClick={() => handleAnswer(index)}
-                            className="bg-slate-900 border-2 rounded-2xl p-6 text-white text-xl font-bold hover:bg-slate-600 transition-colors cursor-pointer w-full"
+                            className={`border-2 rounded-2xl p-6 text-white text-xl font-bold ${hasAnswered ? 'bg-slate-500 opacity-50 cursor-not-allowed' : 'bg-slate-900 hover:bg-slate-600 transition-colors cursor-pointer w-full'}`}
                         >
                             {answer}
                         </button>

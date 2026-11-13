@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 import { io } from 'socket.io-client';
-import type { Player } from './interfaces/interfaces';
 import JoinRoomModal from './components/joinRoomModal';
 import GameScreen from './components/GameScreen';
-import type Question from './interfaces/interfaces';
+import LeaderBoardScreen from './components/LeaderBoardScreen';
+import type { Question, Player } from './interfaces/interfaces';
 import type { GameState } from './interfaces/enums';
 
 
@@ -64,6 +64,11 @@ function App() {
     socket.emit('start_game', { pin: pin });
   }
 
+  const handleAnswerSubmitted = (selectedAnswerIndex: number) => {
+    console.log("Answer submitted:", selectedAnswerIndex);
+    socket.emit('submit_answer', { pin: pin, answerIndex: selectedAnswerIndex });
+  }
+
   useEffect(() => {
     socket.on('room_created', (data: { pin: string, players: Player[] }) => {
       console.log('Chegou ao cliente!', data);
@@ -82,19 +87,29 @@ function App() {
       setCurrentQuestion(question);
     });
 
+    socket.on("round_finished", (players: Player[]) => {
+      console.log("PLAYERS :", players);
+      setPlayers(players);
+      setStateOfPlayer('ROUND_RESULTS');
+    });
+
     return () => {
       socket.off('room_created');
       socket.off("update_players");
       socket.off("new_question");
+      socket.off("round_finished");
     };
-
 
   }, []);
 
   //RETURNING UI BASED ON STATE OF PLAYER
 
   if (stateOfPlayer === 'IN_GAME' && currentQuestion) {
-    return <GameScreen currentQuestion={currentQuestion} />;
+    return <GameScreen currentQuestion={currentQuestion} onAnswerSubmitted={handleAnswerSubmitted} />;
+  }
+
+  if (stateOfPlayer === 'ROUND_RESULTS') {
+    return <LeaderBoardScreen playersList={players} />
   }
 
   if (stateOfPlayer === 'LOBBY_PLAYER') {

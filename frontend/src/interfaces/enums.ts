@@ -3,4 +3,5 @@ export type GameState =
   | "LOBBY_HOST"  // In the lobby, waiting for players to join (host)
   | "LOBBY_PLAYER" // In the lobby, waiting for players to join (player)
   | "IN_GAME"  // In the game, answering questions
-  | "GAME_OVER"; // Game has ended, showing results
+  | "GAME_OVER" // Game has ended, showing results
+  | "ROUND_RESULTS"; // Show the round result, but still in GAME 
