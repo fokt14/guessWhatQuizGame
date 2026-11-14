@@ -50,7 +50,8 @@ export default function LeaderBoardScreen({ playersList, myRole, onNextQuestion,
                 ))}
             </div>
 
-            {myRole === "HOST" || !isLastQuestion && (
+
+            {myRole === "HOST" && !isLastQuestion && (
                 <button
                     onClick={handleNextQuestion}
                     className="mt-10 bg-slate-900 text-white px-6 py-3 rounded-2xl text-xl font-bold hover:bg-slate-600 transition-colors"
