@@ -6,18 +6,16 @@ interface LeaderBoardScreenProps {
     onNextQuestion: () => void;
     isLastQuestion: boolean;
     onRestartGame: () => void;
+    onEndGame: () => void;
 }
 
-export default function LeaderBoardScreen({ playersList, myRole, onNextQuestion, isLastQuestion, onRestartGame }: LeaderBoardScreenProps) {
+export default function LeaderBoardScreen({ playersList, myRole, onNextQuestion, isLastQuestion, onRestartGame, onEndGame }: LeaderBoardScreenProps) {
 
     const sortedPlayers = [...playersList].sort((a, b) => b.points - a.points);
 
     const handleNextQuestion = () => {
         onNextQuestion();
     }
-
-
-
 
     return (
         <div className="w-full min-h-screen flex flex-col items-center justify-center p-4">
@@ -69,7 +67,7 @@ export default function LeaderBoardScreen({ playersList, myRole, onNextQuestion,
                 <div className="flex items-center justify-center gap-4">
                     <button onClick={onRestartGame} className="mt-10 bg-slate-900 text-white px-6 py-3 rounded-2xl text-xl font-bold hover:bg-slate-600 transition-colors">Restart Game</button>
                     <button
-                        onClick={handleNextQuestion}
+                        onClick={onEndGame}
                         className="mt-10 bg-slate-900 text-white px-6 py-3 rounded-2xl text-xl font-bold hover:bg-slate-600 transition-colors"
                     >
                         End Game

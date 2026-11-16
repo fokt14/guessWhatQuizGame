@@ -75,21 +75,11 @@ function App() {
   }
 
   const handleRestartGame = () => {
-
-    // for (let player of players) {
-    //   player.hasAlreadyAnswered = false;
-    //   player.points = 0;
-
-    //   if (player.role === "HOST") {
-    //     setStateOfPlayer('LOBBY_HOST');
-    //   }
-    //   else {
-    //     setStateOfPlayer('LOBBY_PLAYER');
-    //   }
-    // }
-
     socket.emit('restart_game', { pin: pin });
+  }
 
+  const handleEndGame = () => {
+    socket.emit('end_game', { pin: pin });
   }
 
   //UseEffect to listen for socket events and update state accordingly
@@ -132,6 +122,14 @@ function App() {
       }
     });
 
+    socket.on("game_ended", () => {
+      setStateOfPlayer('MENU');
+      setPin('');
+      setPlayers([]);
+      setCurrentQuestion(undefined);
+      setIsLastQuestion(false);
+    });
+
     return () => {
       socket.off('room_created');
       socket.off("update_players");
@@ -152,7 +150,7 @@ function App() {
     const myPlayer = players.find(player => player.id === socket.id);
     const myRole = myPlayer ? myPlayer.role : null;
 
-    return <LeaderBoardScreen playersList={players} myRole={myRole} onNextQuestion={handleNextQuestion} isLastQuestion={isLastQuestion} onRestartGame={handleRestartGame} />
+    return <LeaderBoardScreen playersList={players} myRole={myRole} onNextQuestion={handleNextQuestion} isLastQuestion={isLastQuestion} onRestartGame={handleRestartGame} onEndGame={handleEndGame} />
   }
 
   if (stateOfPlayer === 'LOBBY_PLAYER') {

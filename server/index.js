@@ -185,8 +185,26 @@ io.on("connection", (socket) => {
     }
 
     rooms[data.pin].currentQuestionIndex = 0;
-    
+
     io.to(data.pin).emit("game_restarted", rooms[data.pin].players);
+  });
+
+  socket.on("end_game", (data) => {
+    console.log("END GAME", data);
+
+    if (!rooms[data.pin]) {
+      return socket.emit("error", "Room doesn't exist");
+    }
+
+    if (socket.id !== rooms[data.pin].hostId) {
+      return socket.emit("error", "Id from host is not the same for this room");
+    }
+
+    delete rooms[data.pin];
+
+    io.to(data.pin).emit("game_ended", {
+      message: "Jogo terminado pelo host!",
+    });
   });
 
   socket.on("disconnect", () => {
