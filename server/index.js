@@ -57,6 +57,23 @@ function nextQuestion(pin) {
   sendQuestion(pin);
 }
 
+function checkIfAllPlayersAnswered(pin) {
+  const room = rooms[pin];
+  if (!room) return;
+
+  let playersAlreadyAnswered = room.players.filter(
+    (player) => player.hasAlreadyAnswered,
+  );
+
+  let isLastQuestion = room.currentQuestionIndex === questions.length - 1;
+
+  if (playersAlreadyAnswered.length === room.players.length) {
+    console.log("Ja todos resopodenream", playersAlreadyAnswered);
+
+    io.to(pin).emit("round_finished", room.players, isLastQuestion);
+  }
+}
+
 io.on("connection", (socket) => {
   console.log(`Novo cliente conectado! ID: ${socket.id}`);
 
@@ -78,6 +95,7 @@ io.on("connection", (socket) => {
     };
 
     socket.join(pin);
+    socket.pin = pin;
 
     console.log(`Sala criada com o PIN: ${pin} pelo host: ${socket.id}`);
 
@@ -158,17 +176,7 @@ io.on("connection", (socket) => {
 
     myPlayer.hasAlreadyAnswered = true;
 
-    let playersAlreadyAnswered = room.players.filter(
-      (player) => player.hasAlreadyAnswered,
-    );
-
-    let isLastQuestion = room.currentQuestionIndex === questions.length - 1;
-
-    if (playersAlreadyAnswered.length === room.players.length) {
-      console.log("Ja todos resopodenream", playersAlreadyAnswered);
-
-      io.to(data.pin).emit("round_finished", room.players, isLastQuestion);
-    }
+    checkIfAllPlayersAnswered(data.pin);
   });
 
   socket.on("next_question_in_game", (data) => {
@@ -202,9 +210,7 @@ io.on("connection", (socket) => {
 
     delete rooms[data.pin];
 
-    io.to(data.pin).emit("game_ended", {
-      message: "Jogo terminado pelo host!",
-    });
+    io.to(data.pin).emit("game_ended");
   });
 
   socket.on("disconnect", () => {
@@ -219,6 +225,19 @@ io.on("connection", (socket) => {
 
     const room = rooms[pin];
 
+    const leavingPlayer = room.players.find((p) => p.id === socket.id);
+
+    if (!leavingPlayer) {
+      return;
+    }
+
+    if (leavingPlayer.role === "HOST") {
+      console.log(`O host da sala ${pin} saiu. A sala será encerrada.`);
+      delete rooms[pin];
+      io.to(pin).emit("game_ended");
+      return;
+    }
+
     room.players = room.players.filter((p) => p.id !== socket.id);
 
     console.log(
@@ -226,6 +245,7 @@ io.on("connection", (socket) => {
     );
 
     io.to(pin).emit("update_players", room.players);
+    checkIfAllPlayersAnswered(pin);
   });
 });
 
