@@ -167,13 +167,26 @@ io.on("connection", (socket) => {
     if (playersAlreadyAnswered.length === room.players.length) {
       console.log("Ja todos resopodenream", playersAlreadyAnswered);
 
-      io.to(data.pin).emit("round_finished",  room.players, isLastQuestion);
+      io.to(data.pin).emit("round_finished", room.players, isLastQuestion);
     }
   });
 
   socket.on("next_question_in_game", (data) => {
     console.log("NEXT QUESTION", data);
     nextQuestion(data.pin);
+  });
+
+  socket.on("restart_game", (data) => {
+    console.log("RESTART GAME", data);
+
+    for (let player of rooms[data.pin].players) {
+      player.points = 0;
+      player.hasAlreadyAnswered = false;
+    }
+
+    rooms[data.pin].currentQuestionIndex = 0;
+    
+    io.to(data.pin).emit("game_restarted", rooms[data.pin].players);
   });
 
   socket.on("disconnect", () => {

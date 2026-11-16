@@ -74,6 +74,24 @@ function App() {
     socket.emit('next_question_in_game', { pin: pin });
   }
 
+  const handleRestartGame = () => {
+
+    // for (let player of players) {
+    //   player.hasAlreadyAnswered = false;
+    //   player.points = 0;
+
+    //   if (player.role === "HOST") {
+    //     setStateOfPlayer('LOBBY_HOST');
+    //   }
+    //   else {
+    //     setStateOfPlayer('LOBBY_PLAYER');
+    //   }
+    // }
+
+    socket.emit('restart_game', { pin: pin });
+
+  }
+
   //UseEffect to listen for socket events and update state accordingly
   useEffect(() => {
     socket.on('room_created', (data: { pin: string, players: Player[] }) => {
@@ -93,11 +111,25 @@ function App() {
       setCurrentQuestion(question);
     });
 
-    socket.on("round_finished", (players: Player[], isLastQuestion : boolean) => {
+    socket.on("round_finished", (players: Player[], isLastQuestion: boolean) => {
       console.log("PLAYERS :", players);
       setPlayers(players);
       setIsLastQuestion(isLastQuestion);
       setStateOfPlayer('ROUND_RESULTS');
+    });
+
+    socket.on("game_restarted", (players: Player[]) => {
+      console.log("Game restarted, players:", players);
+      setPlayers(players);
+
+      let myPlayer = players.find(player => player.id === socket.id);
+
+      if (myPlayer?.role === "HOST") {
+        setStateOfPlayer('LOBBY_HOST');
+      }
+      else {
+        setStateOfPlayer('LOBBY_PLAYER');
+      }
     });
 
     return () => {
@@ -105,6 +137,7 @@ function App() {
       socket.off("update_players");
       socket.off("new_question");
       socket.off("round_finished");
+      socket.off("game_restarted");
     };
 
   }, []);
@@ -119,7 +152,7 @@ function App() {
     const myPlayer = players.find(player => player.id === socket.id);
     const myRole = myPlayer ? myPlayer.role : null;
 
-    return <LeaderBoardScreen playersList={players} myRole={myRole} onNextQuestion={handleNextQuestion} isLastQuestion={isLastQuestion} />
+    return <LeaderBoardScreen playersList={players} myRole={myRole} onNextQuestion={handleNextQuestion} isLastQuestion={isLastQuestion} onRestartGame={handleRestartGame} />
   }
 
   if (stateOfPlayer === 'LOBBY_PLAYER') {
@@ -164,7 +197,7 @@ function App() {
                 <button className='border-2 rounded-4xl p-3 hover:bg-blue-400 cursor-pointer' onClick={openJoinRoomModal}>Join room</button>
               </div>
             </div>
-          ) : (
+          ) : ( //Lobby Host View
             <div className='flex flex-col gap-2 items-center justify-center mt-4'>
               <h2 className='font-bold'>Room PIN:</h2>
               <h1 className='text-4xl font-black'>{pin}</h1>
