@@ -11,5 +11,8 @@ const questions = [
   },
 ];
 
+// Oficial linguas
+// 
+
 
 export default questions;

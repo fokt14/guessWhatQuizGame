@@ -74,11 +74,6 @@ function App() {
     socket.emit('submit_answer', { pin: pin, answerIndex: selectedAnswerIndex });
   }
 
-  const handleGoToLeaderboard = () => {
-    console.log("GO TO LEADERBOARD")
-    socket.emit('go_to_leaderboard', { pin: pin , isLastQuestion: isLastQuestion });
-  }
-
   const handleNextQuestion = () => {
     socket.emit('next_question_in_game', { pin: pin });
   }
@@ -197,7 +192,7 @@ function App() {
   }
 
   if (stateOfPlayer === 'FEEDBACK') {
-    return <FeedBackScreen myPlayer={myPlayer} question={currentQuestion} onGoToLeaderboard={handleGoToLeaderboard}></FeedBackScreen>
+    return <FeedBackScreen myPlayer={myPlayer} question={currentQuestion} ></FeedBackScreen>
   }
 
   // RETURNING UI FOR MENU AND LOBBY HOST STATES

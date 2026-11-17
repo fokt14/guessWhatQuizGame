@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { Player, Question } from "../interfaces/interfaces";
 import questions from "../../../server/questions.js";
 
@@ -7,20 +7,21 @@ import questions from "../../../server/questions.js";
 interface FeedBackScreenProps {
     myPlayer: Player | null;
     question: Question | null;
-    onGoToLeaderboard: () => void;
 }
 
-export default function FeedBackScreen({ myPlayer, question, onGoToLeaderboard }: FeedBackScreenProps) {
+export default function FeedBackScreen({ myPlayer, question }: FeedBackScreenProps) {
 
-    const [pin, setPin] = useState('')
-
-    const showLeaderBoard = () => {
-        console.log("SHOW LEADERBOARD")
-    }
+    const [barWidth, setBarWidth] = useState('100%');
 
     let isCorrectAnswer = myPlayer?.lastAnswerIndex === question?.correctAnswerIndex;
 
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setBarWidth('0%');
+        }, 100);
 
+        return () => clearTimeout(timer);
+    }, []);
 
     return (
         <>
@@ -49,13 +50,16 @@ export default function FeedBackScreen({ myPlayer, question, onGoToLeaderboard }
                 {myPlayer?.role === 'HOST' && (
                     <div className="absolute bottom-10">
                         <button
-                            onClick={onGoToLeaderboard}
                             className="px-10 py-4 bg-white text-black font-bold text-xl uppercase tracking-wider rounded-lg shadow-xl hover:bg-gray-100 hover:-translate-y-1 transition-all active:translate-y-0"
                         >
                             View Leaderboard
                         </button>
                     </div>
                 )}
+
+                <div className="absolute bottom-0 left-0 w-full h-2 bg-white/20">
+                    <div className="h-full bg-white transition-all ease-linear" style={{ width: barWidth, transitionDuration: '5000ms' }}></div>
+                </div>
 
             </div>
 

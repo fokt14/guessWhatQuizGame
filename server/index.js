@@ -76,6 +76,10 @@ function checkIfAllPlayersAnswered(pin) {
       isLastQuestion,
       questions[room.currentQuestionIndex],
     ); //show_feedback -- round_finished
+
+    setTimeout(() => {
+      io.to(pin).emit("round_finished", room.players, isLastQuestion);
+    }, 5000);
   }
 }
 
@@ -191,26 +195,6 @@ io.on("connection", (socket) => {
     nextQuestion(data.pin);
   });
 
-  socket.on("go_to_leaderboard", (data) => {
-    console.log("GO TO LEADERBOARD", data);
-
-    if (!rooms[data.pin]) {
-      return socket.emit("error", "Room doesn't exist");
-    }
-
-    console.log(
-      "ULTIMA QUESTA",
-      rooms[data.pin].currentQuestionIndex,
-      data.isLastQuestion,
-    );
-
-    io.to(data.pin).emit(
-      "round_finished",
-      rooms[data.pin].players,
-      data.isLastQuestion,
-    );
-  });
-
   socket.on("restart_game", (data) => {
     console.log("RESTART GAME", data);
 
@@ -277,5 +261,5 @@ io.on("connection", (socket) => {
 });
 
 server.listen(3000, () => {
-  console.log("🚀 Servidor Socket.io a correr na porta 3000");
+  console.log("Servidor Socket.io a correr na porta 3000");
 });
