@@ -4,6 +4,7 @@ export  interface Player {
   role : "HOST" | "PLAYER";
   hasAlreadyAnswered: boolean,
   points: number;
+  lastAnswerIndex: number | null;
 }
 
 export  interface Question {

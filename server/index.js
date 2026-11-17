@@ -70,7 +70,12 @@ function checkIfAllPlayersAnswered(pin) {
   if (playersAlreadyAnswered.length === room.players.length) {
     console.log("Ja todos resopodenream", playersAlreadyAnswered);
 
-    io.to(pin).emit("round_finished", room.players, isLastQuestion);
+    io.to(pin).emit(
+      "show_feedback",
+      room.players,
+      isLastQuestion,
+      questions[room.currentQuestionIndex],
+    ); //show_feedback -- round_finished
   }
 }
 
@@ -168,6 +173,8 @@ io.on("connection", (socket) => {
 
     const currentQ = questions[room.currentQuestionIndex];
 
+    myPlayer.lastAnswerIndex = data.answerIndex;
+
     if (currentQ.correctIndex == data.answerIndex) {
       console.log("CARLADHWA");
       myPlayer.points += 100;
@@ -182,6 +189,26 @@ io.on("connection", (socket) => {
   socket.on("next_question_in_game", (data) => {
     console.log("NEXT QUESTION", data);
     nextQuestion(data.pin);
+  });
+
+  socket.on("go_to_leaderboard", (data) => {
+    console.log("GO TO LEADERBOARD", data);
+
+    if (!rooms[data.pin]) {
+      return socket.emit("error", "Room doesn't exist");
+    }
+
+    console.log(
+      "ULTIMA QUESTA",
+      rooms[data.pin].currentQuestionIndex,
+      data.isLastQuestion,
+    );
+
+    io.to(data.pin).emit(
+      "round_finished",
+      rooms[data.pin].players,
+      data.isLastQuestion,
+    );
   });
 
   socket.on("restart_game", (data) => {

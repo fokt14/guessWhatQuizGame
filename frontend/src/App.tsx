@@ -6,6 +6,7 @@ import GameScreen from './components/GameScreen';
 import LeaderBoardScreen from './components/LeaderBoardScreen';
 import type { Question, Player } from './interfaces/interfaces';
 import type { GameState } from './interfaces/enums';
+import FeedBackScreen from './components/FeedBackScreen';
 
 
 const socket = io('http://localhost:3000');
@@ -19,8 +20,11 @@ function App() {
   const [errorMessage, setErrorMessage] = useState('');
   const [stateOfPlayer, setStateOfPlayer] = useState<GameState>('MENU'); // MENU, LOBBY_HOST, LOBBY_PLAYER, IN_GAME, GAME_OVER
   const [isJoinRoomModalOpen, setIsJoinRoomModalOpen] = useState(false);
-  const [currentQuestion, setCurrentQuestion] = useState<Question>();
+  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [isLastQuestion, setIsLastQuestion] = useState(false);
+  const [myRole, setMyRole] = useState<"HOST" | "PLAYER" | null>(null);
+  const [myPlayer, setMyPlayer] = useState<Player | null>(null);
+  const [correctIndexAnswer, setCorrectIndexAnswer] = useState<number | null>(null);
 
 
   const handleCreateRoom = () => {
@@ -70,6 +74,11 @@ function App() {
     socket.emit('submit_answer', { pin: pin, answerIndex: selectedAnswerIndex });
   }
 
+  const handleGoToLeaderboard = () => {
+    console.log("GO TO LEADERBOARD")
+    socket.emit('go_to_leaderboard', { pin: pin , isLastQuestion: isLastQuestion });
+  }
+
   const handleNextQuestion = () => {
     socket.emit('next_question_in_game', { pin: pin });
   }
@@ -101,9 +110,27 @@ function App() {
       setCurrentQuestion(question);
     });
 
+    socket.on("show_feedback", (players: Player[], isLastQuestion: boolean, question: Question) => {
+      console.log("PLAYERS FA :", question, players);
+      setStateOfPlayer('FEEDBACK');
+      setPlayers(players);
+
+      let foundMyPlayer = players.find(player => player.id === socket.id);
+
+      console.log("isLastQuestion:", isLastQuestion);
+
+      setIsLastQuestion(isLastQuestion);
+
+      setMyPlayer(foundMyPlayer || null);
+      setMyRole(foundMyPlayer?.role || null);
+
+      setCorrectIndexAnswer(question.correctAnswerIndex);
+    });
+
     socket.on("round_finished", (players: Player[], isLastQuestion: boolean) => {
       console.log("PLAYERS :", players);
       setPlayers(players);
+      console.log(" round -fi nexisLastQuestion:", isLastQuestion);
       setIsLastQuestion(isLastQuestion);
       setStateOfPlayer('ROUND_RESULTS');
     });
@@ -126,7 +153,7 @@ function App() {
       setStateOfPlayer('MENU');
       setPin('');
       setPlayers([]);
-      setCurrentQuestion(undefined);
+      setCurrentQuestion(null);
       setIsLastQuestion(false);
     });
 
@@ -147,8 +174,6 @@ function App() {
   }
 
   if (stateOfPlayer === 'ROUND_RESULTS') {
-    const myPlayer = players.find(player => player.id === socket.id);
-    const myRole = myPlayer ? myPlayer.role : null;
 
     return <LeaderBoardScreen playersList={players} myRole={myRole} onNextQuestion={handleNextQuestion} isLastQuestion={isLastQuestion} onRestartGame={handleRestartGame} onEndGame={handleEndGame} />
   }
@@ -169,6 +194,10 @@ function App() {
         </div>
       </div>
     );
+  }
+
+  if (stateOfPlayer === 'FEEDBACK') {
+    return <FeedBackScreen myPlayer={myPlayer} question={currentQuestion} onGoToLeaderboard={handleGoToLeaderboard}></FeedBackScreen>
   }
 
   // RETURNING UI FOR MENU AND LOBBY HOST STATES

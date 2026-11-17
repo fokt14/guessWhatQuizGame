@@ -14,6 +14,7 @@ export default function LeaderBoardScreen({ playersList, myRole, onNextQuestion,
     const sortedPlayers = [...playersList].sort((a, b) => b.points - a.points);
 
     const handleNextQuestion = () => {
+        console.log("sdad", isLastQuestion)
         onNextQuestion();
     }
 
