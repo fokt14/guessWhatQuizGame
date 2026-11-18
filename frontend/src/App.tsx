@@ -60,9 +60,6 @@ function App() {
     }
 
     socket.emit('join_room', { pin: pinFromModal, nickname: nickname });
-    setStateOfPlayer('LOBBY_PLAYER');
-    setPin(pinFromModal);
-    console.log(`Tentando entrar na sala com PIN: ${pinFromModal} e Nickname: ${nickname}`);
   }
 
   const handleStartGame = () => {
@@ -90,6 +87,13 @@ function App() {
   useEffect(() => {
     socket.on('room_created', (data: { pin: string, players: Player[] }) => {
       console.log('Chegou ao cliente!', data);
+      setPlayers(data.players);
+      setPin(data.pin);
+    });
+
+    socket.on("joined_room", (data: { pin: string, players: Player[] }) => {
+      console.log("Joined room:", data);
+      setStateOfPlayer('LOBBY_PLAYER');
       setPlayers(data.players);
       setPin(data.pin);
     });
@@ -152,12 +156,20 @@ function App() {
       setIsLastQuestion(false);
     });
 
+    socket.on("error", (message: string) => {
+      console.error("Error from server:", message);
+      setErrorMessage(message);
+    });
+
     return () => {
       socket.off('room_created');
+      socket.off('joined_room');
       socket.off("update_players");
       socket.off("new_question");
       socket.off("round_finished");
       socket.off("game_restarted");
+      socket.off("game_ended");
+      socket.off("error");
     };
 
   }, []);

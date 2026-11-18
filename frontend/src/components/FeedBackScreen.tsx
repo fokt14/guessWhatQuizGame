@@ -41,16 +41,6 @@ export default function FeedBackScreen({ myPlayer, question }: FeedBackScreenPro
                     </p>
                 </div>
 
-                {myPlayer?.role === 'HOST' && (
-                    <div className="absolute bottom-10">
-                        <button
-                            className="px-10 py-4 bg-white text-black font-bold text-xl uppercase tracking-wider rounded-lg shadow-xl hover:bg-gray-100 hover:-translate-y-1 transition-all active:translate-y-0"
-                        >
-                            View Leaderboard
-                        </button>
-                    </div>
-                )}
-
                 <div className="absolute bottom-0 left-0 w-full h-2 bg-white/20">
                     <div className="h-full bg-white transition-all ease-linear" style={{ width: barWidth, transitionDuration: '5000ms' }}></div>
                 </div>

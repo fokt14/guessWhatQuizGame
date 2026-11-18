@@ -116,8 +116,14 @@ io.on("connection", (socket) => {
   socket.on("join_room", (data) => {
     console.log("Entrou", data, data.pin, data.nickname);
     if (!rooms[data.pin]) {
-      return socket.emit("error", "Sala nao existe");
+      return socket.emit("error", "Room doesn't exist");
     }
+
+    if (rooms[data.pin].state !== "LOBBY_HOST") {
+      return socket.emit("error", "Game already started");
+    }
+
+    socket.emit("joined_room", { pin: data.pin, players: rooms[data.pin].players });
 
     socket.pin = data.pin;
     rooms[data.pin].players.push({
@@ -217,6 +223,7 @@ io.on("connection", (socket) => {
     }
 
     rooms[data.pin].currentQuestionIndex = 0;
+    rooms[data.pin].state = "LOBBY_HOST";
 
     io.to(data.pin).emit("game_restarted", rooms[data.pin].players);
   });
