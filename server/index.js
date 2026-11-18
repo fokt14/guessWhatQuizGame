@@ -132,9 +132,20 @@ io.on("connection", (socket) => {
     let token = Math.random().toString(36).substring(2, 15); // Generate a random token for the player
 
     socket.pin = data.pin;
+
+    const isNameTaken = rooms[data.pin].players.some(
+      (player) =>
+        player.nickname.toLowerCase().trim() ===
+        data.nickname.toLowerCase().trim(),
+    );
+
+    if (isNameTaken) {
+      return socket.emit("error", "Nickname already taken in this room");
+    }
+
     rooms[data.pin].players.push({
       id: socket.id,
-      nickname: data.nickname,
+      nickname: data.nickname.trim(),
       role: "PLAYER",
       hasAlreadyAnswered: false,
       points: 0,
@@ -294,10 +305,15 @@ io.on("connection", (socket) => {
 
     io.to(pin).emit("update_players", room.players);
 
-    const currentQuestion = room.state === "IN_GAME" ? questions[room.currentQuestionIndex] : null;
-    const elapsedSeconds = room.questionStartTime ? Math.floor((Date.now() - room.questionStartTime) / 1000) : QUESTION_DURATION_SECONDS;
+    const currentQuestion =
+      room.state === "IN_GAME" ? questions[room.currentQuestionIndex] : null;
+    const elapsedSeconds = room.questionStartTime
+      ? Math.floor((Date.now() - room.questionStartTime) / 1000)
+      : QUESTION_DURATION_SECONDS;
 
-    const timeRemainingSeconds = Math.max(0, QUESTION_DURATION_SECONDS - elapsedSeconds,
+    const timeRemainingSeconds = Math.max(
+      0,
+      QUESTION_DURATION_SECONDS - elapsedSeconds,
     );
 
     socket.emit("reconnected_success", {
