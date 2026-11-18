@@ -32,12 +32,6 @@ export default function FeedBackScreen({ myPlayer, question }: FeedBackScreenPro
                     {isCorrectAnswer ? 'CORRECT' : 'INCORRECT'}
                 </h1>
 
-                <div className="bg-white/20 px-8 py-3 rounded-full mb-12 backdrop-blur-sm shadow-sm">
-                    <span className="text-2xl md:text-3xl font-bold tracking-wider">
-                        {isCorrectAnswer ? '+ 100 POINTS' : '0 POINTS'}
-                    </span>
-                </div>
-
                 <div className="text-center mb-16">
                     <p className="text-lg md:text-xl font-medium text-white/80 mb-2">
                         Correct answer:

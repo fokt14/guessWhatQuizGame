@@ -34,6 +34,8 @@ function sendQuestion(pin) {
     return io.to(pin).emit("game_over", { message: "Jogo terminado!" });
   }
 
+  room.questionStartTime = Date.now();
+
   const questionToSend = {
     questionIndex: room.currentQuestionIndex,
     totalQuestions: questions.length,
@@ -155,6 +157,8 @@ io.on("connection", (socket) => {
   });
 
   socket.on("submit_answer", (data) => {
+    let answerTime = Date.now();
+
     if (!rooms[data.pin]) {
       console.log("Wrong room");
       return;
@@ -162,6 +166,9 @@ io.on("connection", (socket) => {
     console.log("SUBMITE _ASNE", data);
 
     let room = rooms[data.pin];
+
+    let timeTaken = answerTime - room.questionStartTime;
+    console.log("TIME TAKEN", timeTaken);
 
     let myPlayer = room.players.find((player) => player.id == socket.id);
 
@@ -181,7 +188,13 @@ io.on("connection", (socket) => {
 
     if (currentQ.correctIndex == data.answerIndex) {
       console.log("CARLADHWA");
-      myPlayer.points += 100;
+
+      let timeRemaining = Math.max(0, 15000 - timeTaken);
+      let percentageOfTimeTaken = timeRemaining / 15000;
+      let pointsWon = Math.round(percentageOfTimeTaken * 100);
+
+      myPlayer.points += pointsWon;
+
       console.log("MY_POINTS", myPlayer.points);
     }
 
