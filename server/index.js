@@ -11,6 +11,7 @@ app.use(cors());
 const server = http.createServer(app);
 
 const rooms = {};
+const QUESTION_DURATION_SECONDS = 15;
 
 const io = new Server(server, {
   cors: {
@@ -42,6 +43,7 @@ function sendQuestion(pin) {
     question: currentQ.question,
     answers: currentQ.answers,
     correctAnswerIndex: currentQ.correctIndex,
+    timeRemainingSeconds: QUESTION_DURATION_SECONDS,
   };
 
   io.to(pin).emit("new_question", questionToSend);
@@ -63,13 +65,17 @@ function checkIfAllPlayersAnswered(pin) {
   const room = rooms[pin];
   if (!room) return;
 
-  let playersAlreadyAnswered = room.players.filter(
+  let activePlayers = room.players.filter(
+    (player) => player.isOnline !== false,
+  );
+
+  let playersAlreadyAnswered = activePlayers.filter(
     (player) => player.hasAlreadyAnswered,
   );
 
   let isLastQuestion = room.currentQuestionIndex === questions.length - 1;
 
-  if (playersAlreadyAnswered.length === room.players.length) {
+  if (playersAlreadyAnswered.length === activePlayers.length) {
     console.log("Ja todos resopodenream", playersAlreadyAnswered);
 
     io.to(pin).emit(
@@ -123,7 +129,7 @@ io.on("connection", (socket) => {
       return socket.emit("error", "Game already started");
     }
 
-    socket.emit("joined_room", { pin: data.pin, players: rooms[data.pin].players });
+    let token = Math.random().toString(36).substring(2, 15); // Generate a random token for the player
 
     socket.pin = data.pin;
     rooms[data.pin].players.push({
@@ -132,13 +138,29 @@ io.on("connection", (socket) => {
       role: "PLAYER",
       hasAlreadyAnswered: false,
       points: 0,
+      token: token,
     });
+
+    const playersInTheRoom = rooms[data.pin].players.map((player) => ({
+      id: player.id,
+      nickname: player.nickname,
+      role: player.role,
+      hasAlreadyAnswered: player.hasAlreadyAnswered,
+      points: player.points,
+    }));
+
+    socket.emit("joined_room", {
+      pin: data.pin,
+      players: playersInTheRoom,
+      mySecretToken: token,
+    });
+
     socket.join(data.pin);
 
     console.log(
       `Cliente ${socket.id} entrou na sala com PIN: ${data.pin} e Nickname: ${data.nickname}`,
     );
-    io.to(data.pin).emit("update_players", rooms[data.pin].players);
+    io.to(data.pin).emit("update_players", playersInTheRoom);
   });
 
   socket.on("start_game", (data) => {
@@ -244,6 +266,60 @@ io.on("connection", (socket) => {
     io.to(data.pin).emit("game_ended");
   });
 
+  socket.on("reconnect_attempt", (data) => {
+    console.log("RECONNECT ATTEMPT", data);
+
+    const { pin, token } = data;
+
+    if (!rooms[pin]) {
+      return socket.emit("error", "Room doesn't exist");
+    }
+
+    const room = rooms[pin];
+
+    const playerToReconnect = room.players.find(
+      (player) => player.token === token,
+    );
+
+    if (!playerToReconnect) {
+      return socket.emit("error", "Player not found in the room");
+    }
+
+    // Update the player's ID to the new socket ID
+    playerToReconnect.id = socket.id;
+    playerToReconnect.isOnline = true; // Mark the player as online
+
+    socket.join(pin);
+    socket.pin = pin;
+
+    io.to(pin).emit("update_players", room.players);
+
+    const currentQuestion = room.state === "IN_GAME" ? questions[room.currentQuestionIndex] : null;
+    const elapsedSeconds = room.questionStartTime ? Math.floor((Date.now() - room.questionStartTime) / 1000) : QUESTION_DURATION_SECONDS;
+
+    const timeRemainingSeconds = Math.max(0, QUESTION_DURATION_SECONDS - elapsedSeconds,
+    );
+
+    socket.emit("reconnected_success", {
+      myPlayer: playerToReconnect,
+      roomState: room.state,
+      currentQuestion: currentQuestion
+        ? {
+            questionIndex: room.currentQuestionIndex,
+            totalQuestions: questions.length,
+            question: currentQuestion.question,
+            answers: currentQuestion.answers,
+            correctAnswerIndex: currentQuestion.correctIndex,
+            timeRemainingSeconds,
+          }
+        : null,
+    });
+
+    console.log(
+      `Player with token ${token} reconnected to room ${pin} with new socket ID ${socket.id}`,
+    );
+  });
+
   socket.on("disconnect", () => {
     console.log(`Cliente desconectado: ${socket.id}`);
 
@@ -269,7 +345,7 @@ io.on("connection", (socket) => {
       return;
     }
 
-    room.players = room.players.filter((p) => p.id !== socket.id);
+    leavingPlayer.isOnline = false; // Mark the player as offline instead of removing them
 
     console.log(
       `Jogador saiu da sala ${pin}. Restam ${room.players.length} jogadores.`,

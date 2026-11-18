@@ -11,7 +11,7 @@ interface GameScreenProps {
 
 export default function GameScreen({ currentQuestion, onAnswerSubmitted }: GameScreenProps) {
 
-    const [timeLeft, setTimeLeft] = useState(15);
+    const [timeLeft, setTimeLeft] = useState(currentQuestion.timeRemainingSeconds ?? 15);
     const [hasAnswered, setHasAnswered] = useState(false);
 
     const handleAnswer = (index: number): void => {

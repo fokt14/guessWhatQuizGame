@@ -12,6 +12,7 @@ export  interface Question {
   answers: string[];
   correctAnswerIndex: number;
   currentQuestionIndex: number;
+  timeRemainingSeconds?: number;
 }
 
 

@@ -14,8 +14,8 @@ const socket = io('http://localhost:3000');
 
 function App() {
 
-  const [pin, setPin] = useState('')
-  const [nickname, setNickname] = useState('');
+  const [pin, setPin] = useState(() => sessionStorage.getItem('lastRoomPin') ?? '')
+  const [nickname, setNickname] = useState(() => sessionStorage.getItem('nickname') ?? '');
   const [players, setPlayers] = useState<Player[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [stateOfPlayer, setStateOfPlayer] = useState<GameState>('MENU'); // MENU, LOBBY_HOST, LOBBY_PLAYER, IN_GAME, GAME_OVER
@@ -36,6 +36,7 @@ function App() {
     }
 
     socket.emit('create_room', { nickname: nickname });
+    sessionStorage.setItem('nickname', nickname);
     setStateOfPlayer('LOBBY_HOST');
   };
 
@@ -59,6 +60,7 @@ function App() {
       return;
     }
 
+    sessionStorage.setItem('nickname', nickname);
     socket.emit('join_room', { pin: pinFromModal, nickname: nickname });
   }
 
@@ -85,17 +87,38 @@ function App() {
 
   //UseEffect to listen for socket events and update state accordingly
   useEffect(() => {
+    socket.on('reconnected_success', (data: {
+      myPlayer: Player;
+      roomState: GameState;
+      currentQuestion: Question | null;
+    }) => {
+      setMyPlayer(data.myPlayer);
+      setMyRole(data.myPlayer.role);
+      setCurrentQuestion(data.currentQuestion);
+
+      if (data.roomState === 'LOBBY_HOST' || data.roomState === 'LOBBY_PLAYER') {
+        setStateOfPlayer(data.myPlayer.role === 'HOST' ? 'LOBBY_HOST' : 'LOBBY_PLAYER');
+      }
+      if (data.roomState === 'IN_GAME') {
+        setStateOfPlayer('IN_GAME');
+      }
+    });
+
     socket.on('room_created', (data: { pin: string, players: Player[] }) => {
       console.log('Chegou ao cliente!', data);
       setPlayers(data.players);
       setPin(data.pin);
     });
 
-    socket.on("joined_room", (data: { pin: string, players: Player[] }) => {
+    socket.on("joined_room", (data: { pin: string, players: Player[], mySecretToken: string }) => {
       console.log("Joined room:", data);
       setStateOfPlayer('LOBBY_PLAYER');
       setPlayers(data.players);
       setPin(data.pin);
+
+      sessionStorage.setItem('lastRoomPin', data.pin);
+      sessionStorage.setItem('playerToken', data.mySecretToken);
+
     });
 
     socket.on("update_players", (updatedList: Player[]) => {
@@ -154,6 +177,9 @@ function App() {
       setPlayers([]);
       setCurrentQuestion(null);
       setIsLastQuestion(false);
+      sessionStorage.removeItem('lastRoomPin');
+      sessionStorage.removeItem('playerToken');
+      sessionStorage.removeItem('nickname');
     });
 
     socket.on("error", (message: string) => {
@@ -161,7 +187,19 @@ function App() {
       setErrorMessage(message);
     });
 
+    const storedPin = sessionStorage.getItem('lastRoomPin');
+    const storedToken = sessionStorage.getItem('playerToken');
+
+    if (storedPin && storedToken) {
+      socket.emit('reconnect_attempt', {
+        pin: storedPin,
+        nickname: sessionStorage.getItem('nickname'),
+        token: storedToken,
+      });
+    }
+
     return () => {
+      socket.off('reconnected_success');
       socket.off('room_created');
       socket.off('joined_room');
       socket.off("update_players");
