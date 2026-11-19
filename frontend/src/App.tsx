@@ -211,8 +211,8 @@ function App() {
       });
     }
 
-    socket.on("kicked_from_room", (message: string) => {
-      console.log("Kicked from room:", message);
+    socket.on("reconnect_failed_kicked_or_closed", (message: string) => {
+      console.log(message);
       setErrorMessage(message);
       setStateOfPlayer('MENU');
       setPin('');
@@ -235,7 +235,7 @@ function App() {
       socket.off("game_restarted");
       socket.off("game_ended");
       socket.off("show_feedback");
-      socket.off("kicked_from_room");
+      socket.off("reconnect_failed_kicked_or_closed");
       socket.off("error");
     };
 

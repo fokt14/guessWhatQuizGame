@@ -116,12 +116,15 @@ function checkIfAllPlayersAnswered(pin) {
       },
     ); //show_feedback -- round_finished
 
-    setTimeout(() => {
+    clearTimeout(room.roundTimer); // Clear any existing timer before setting a new one
+    room.roundTimer = setTimeout(() => {
       io.to(pin).emit(
         "round_finished",
         getCleanPlayersList(room.players),
         isLastQuestion,
       );
+
+      room.roundTimer = null;
     }, 5000);
   }
 }
@@ -157,6 +160,7 @@ io.on("connection", (socket) => {
         },
       ],
       maxPlayers: 10,
+      roundTimer: null,
       state: "LOBBY_HOST",
     };
 
@@ -347,7 +351,7 @@ io.on("connection", (socket) => {
     io.sockets.sockets.get(playerId)?.leave(data.pin); // Make the kicked player leave the room
 
     io.to(playerId).emit(
-      "kicked_from_room",
+      "reconnect_failed_kicked_or_closed",
       "You have been kicked from the room.",
     );
 
@@ -376,7 +380,10 @@ io.on("connection", (socket) => {
     const { pin, token } = data;
 
     if (!rooms[pin]) {
-      return socket.emit("error", "Room doesn't exist");
+      return socket.emit(
+        "reconnect_failed_kicked_or_closed",
+        "This room does not exist or has been closed.",
+      );
     }
 
     const room = rooms[pin];
