@@ -126,6 +126,8 @@ function checkIfAllPlayersAnswered(pin) {
   }
 }
 
+//SOCKET.IO
+
 io.on("connection", (socket) => {
   console.log(`Novo cliente conectado! ID: ${socket.id}`);
 
@@ -154,6 +156,7 @@ io.on("connection", (socket) => {
           points: 0,
         },
       ],
+      maxPlayers: 10,
       state: "LOBBY_HOST",
     };
 
@@ -176,6 +179,10 @@ io.on("connection", (socket) => {
 
     if (rooms[data.pin].state !== "LOBBY_HOST") {
       return socket.emit("error", "Game already started");
+    }
+
+    if (rooms[data.pin].players.length >= rooms[data.pin].maxPlayers) {
+      return socket.emit("error", "Room is full");
     }
 
     let token = Math.random().toString(36).substring(2, 15); // Generate a random token for the player

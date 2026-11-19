@@ -12,6 +12,7 @@ import deleteFriendIcon from './assets/delete-friend-svgrepo-com.svg';
 
 const socket = io('http://localhost:3000');
 
+const MAX_PLAYERS_IN_ROOM = 10;
 
 function App() {
 
@@ -258,7 +259,7 @@ function App() {
           <h1 className="text-3xl font-bold">You are in! </h1>
           <p className="text-xl text-slate-400">Wait for the host...</p>
           <h2 className="text-2xl font-semibold">Room PIN: {pin}</h2>
-          <h3 className="text-xl font-semibold">Players in the room ({players.length}):</h3>
+          <h3 className="text-xl font-semibold">Players in the room ({players.length}) : {MAX_PLAYERS_IN_ROOM}</h3>
           <ul className="flex flex-wrap gap-2 justify-center">
             {players.map((player) => (
               <li key={player.id} className="bg-white text-black px-3 py-1 rounded-full text-sm font-semibold">{player.nickname}</li>
@@ -301,7 +302,7 @@ function App() {
             <div className='flex flex-col gap-2 items-center justify-center mt-4'>
               <h2 className='font-bold'>Room PIN:</h2>
               <h1 className='text-4xl font-black'>{pin}</h1>
-              <h3 className='font-bold mt-4'>Players in the room ({players.length}):</h3>
+              <h3 className='font-bold mt-4'>Players in the room ({players.length}) : {MAX_PLAYERS_IN_ROOM}</h3>
               <ul className='flex flex-wrap gap-2 justify-center'>
                 {players.map((player) => (
                   <div className='bg-white px-3 py-1 rounded-full text-sm font-semibold flex items-center justify-center' key={player.id}>
