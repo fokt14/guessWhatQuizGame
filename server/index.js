@@ -31,6 +31,7 @@ function getCleanPlayersList(players) {
     role: player.role,
     hasAlreadyAnswered: player.hasAlreadyAnswered,
     points: player.points,
+    lastAnswerIndex: player.lastAnswerIndex ?? null,
   }));
 }
 
@@ -65,6 +66,7 @@ function nextQuestion(pin) {
 
   for (let player of room.players) {
     player.hasAlreadyAnswered = false;
+    player.lastAnswerIndex = null;
   }
 
   room.currentQuestionIndex++;
@@ -87,12 +89,20 @@ function checkIfAllPlayersAnswered(pin) {
 
   if (playersAlreadyAnswered.length === activePlayers.length) {
     console.log("Ja todos resopodenream", playersAlreadyAnswered);
+    const feedbackQuestion = questions[room.currentQuestionIndex];
 
     io.to(pin).emit(
       "show_feedback",
       getCleanPlayersList(room.players),
       isLastQuestion,
-      questions[room.currentQuestionIndex],
+      {
+        questionIndex: room.currentQuestionIndex,
+        totalQuestions: questions.length,
+        question: feedbackQuestion.question,
+        answers: feedbackQuestion.answers,
+        correctAnswerIndex: feedbackQuestion.correctIndex,
+        timeRemainingSeconds: QUESTION_DURATION_SECONDS,
+      },
     ); //show_feedback -- round_finished
 
     setTimeout(() => {
@@ -264,6 +274,7 @@ io.on("connection", (socket) => {
     for (let player of rooms[data.pin].players) {
       player.points = 0;
       player.hasAlreadyAnswered = false;
+      player.lastAnswerIndex = null;
     }
 
     rooms[data.pin].currentQuestionIndex = 0;
@@ -274,7 +285,7 @@ io.on("connection", (socket) => {
       getCleanPlayersList(rooms[data.pin].players),
     );
   });
-  
+
   socket.on("kick_player", (data) => {
     console.log("KICK PLAYER", data);
     let room = rooms[data.pin];

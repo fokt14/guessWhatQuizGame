@@ -114,6 +114,8 @@ function App() {
       console.log('Chegou ao cliente!', data);
       setPlayers(data.players);
       setPin(data.pin);
+      setMyPlayer(data.players.find(player => player.id === socket.id) || null);
+      setMyRole('HOST');
     });
 
     socket.on("joined_room", (data: { pin: string, players: Player[], mySecretToken: string }) => {
@@ -121,6 +123,8 @@ function App() {
       setStateOfPlayer('LOBBY_PLAYER');
       setPlayers(data.players);
       setPin(data.pin);
+      setMyPlayer(data.players.find(player => player.id === socket.id) || null);
+      setMyRole('PLAYER');
 
       sessionStorage.setItem('lastRoomPin', data.pin);
       sessionStorage.setItem('playerToken', data.mySecretToken);
@@ -130,6 +134,7 @@ function App() {
     socket.on("update_players", (updatedList: Player[]) => {
       console.log("Lista de jogadores recebida:", updatedList);
       setPlayers(updatedList);
+      setMyPlayer(updatedList.find(player => player.id === socket.id) || null);
     });
 
     socket.on("new_question", (question: any) => {
@@ -153,6 +158,7 @@ function App() {
       setMyRole(foundMyPlayer?.role || null);
 
       setCorrectIndexAnswer(question.correctAnswerIndex);
+      setCurrentQuestion(question);
     });
 
     socket.on("round_finished", (players: Player[], isLastQuestion: boolean) => {

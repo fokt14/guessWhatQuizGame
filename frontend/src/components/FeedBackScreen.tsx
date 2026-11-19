@@ -25,9 +25,8 @@ export default function FeedBackScreen({ myPlayer, question }: FeedBackScreenPro
 
     return (
         <>
-
+        
             <div className={`min-h-screen w-full flex flex-col items-center justify-center transition-colors duration-500 ${isCorrectAnswer ? 'bg-green-500' : 'bg-red-500'} text-white px-4`}>
-
                 <h1 className="text-6xl md:text-8xl font-black tracking-widest uppercase mb-4 text-center drop-shadow-md">
                     {isCorrectAnswer ? 'CORRECT' : 'INCORRECT'}
                 </h1>
