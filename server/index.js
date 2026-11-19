@@ -21,7 +21,18 @@ const io = new Server(server, {
 });
 
 function generatePIN() {
-  return Math.floor(1000 + Math.random() * 9000).toString();
+  let pin = "";
+  let i = 0;
+
+  do {
+    pin = Math.floor(1000 + Math.random() * 9000).toString();
+    i++;
+  } while (rooms[pin] && i < 100);
+
+  if (rooms[pin]) {
+    return null;
+  }
+  return pin;
 }
 
 function getCleanPlayersList(players) {
@@ -120,6 +131,17 @@ io.on("connection", (socket) => {
 
   socket.on("create_room", (data) => {
     const pin = generatePIN();
+
+    if (!pin) {
+      return socket.emit(
+        "error",
+        "Unable to generate a unique PIN. Please try again.",
+      );
+    }
+
+    if (rooms[pin]) {
+      return socket.emit("error", "Room with this PIN already exists");
+    }
 
     rooms[pin] = {
       hostId: socket.id,
