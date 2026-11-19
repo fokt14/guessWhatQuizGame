@@ -7,6 +7,7 @@ import LeaderBoardScreen from './components/LeaderBoardScreen';
 import type { Question, Player } from './interfaces/interfaces';
 import type { GameState } from './interfaces/enums';
 import FeedBackScreen from './components/FeedBackScreen';
+import deleteFriendIcon from './assets/delete-friend-svgrepo-com.svg';
 
 
 const socket = io('http://localhost:3000');
@@ -39,6 +40,11 @@ function App() {
     sessionStorage.setItem('nickname', nickname);
     setStateOfPlayer('LOBBY_HOST');
   };
+
+  const handleRemovePlayer = (playerId: string) => {
+    console.log("Removing player with ID:", playerId);
+    socket.emit('kick_player', { pin: pin, playerId: playerId });
+  }
 
   const openJoinRoomModal = () => {
     if (!nickname) {
@@ -198,6 +204,20 @@ function App() {
       });
     }
 
+    socket.on("kicked_from_room", (message: string) => {
+      console.log("Kicked from room:", message);
+      setErrorMessage(message);
+      setStateOfPlayer('MENU');
+      setPin('');
+      setPlayers([]);
+      setMyPlayer(null);
+      setMyRole(null);
+      setCurrentQuestion(null);
+      setIsLastQuestion(false);
+      sessionStorage.removeItem('lastRoomPin');
+      sessionStorage.removeItem('playerToken');
+    });
+
     return () => {
       socket.off('reconnected_success');
       socket.off('room_created');
@@ -207,6 +227,8 @@ function App() {
       socket.off("round_finished");
       socket.off("game_restarted");
       socket.off("game_ended");
+      socket.off("show_feedback");
+      socket.off("kicked_from_room");
       socket.off("error");
     };
 
@@ -276,7 +298,19 @@ function App() {
               <h3 className='font-bold mt-4'>Players in the room ({players.length}):</h3>
               <ul className='flex flex-wrap gap-2 justify-center'>
                 {players.map((player) => (
-                  <li key={player.id} className='bg-white px-3 py-1 rounded-full text-sm font-semibold'>{player.nickname}</li>
+                  <div className='bg-white px-3 py-1 rounded-full text-sm font-semibold flex items-center justify-center' key={player.id}>
+                    <li key={player.id} className=''>{player.nickname}</li>
+                    {player.id !== socket.id && (
+                      <button
+                        type='button'
+                        className='ml-2 w-5 h-5 flex items-center justify-center cursor-pointer hover:scale-110 transition-transform'
+                        aria-label={`Remove ${player.nickname}`}
+                        onClick={() => handleRemovePlayer(player.id)}
+                      >
+                        <img src={deleteFriendIcon} alt='' className='w-4 h-4' />
+                      </button>)
+                    }
+                  </div>
                 ))}
               </ul>
               <button onClick={handleStartGame} className='border-2 bg-green-500 text-white font-bold rounded-4xl p-3 hover:bg-green-600 cursor-pointer mt-4'>Start game</button>

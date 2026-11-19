@@ -24,6 +24,16 @@ function generatePIN() {
   return Math.floor(1000 + Math.random() * 9000).toString();
 }
 
+function getCleanPlayersList(players) {
+  return players.map((player) => ({
+    id: player.id,
+    nickname: player.nickname,
+    role: player.role,
+    hasAlreadyAnswered: player.hasAlreadyAnswered,
+    points: player.points,
+  }));
+}
+
 function sendQuestion(pin) {
   const room = rooms[pin];
   const currentQ = questions[room.currentQuestionIndex];
@@ -80,13 +90,17 @@ function checkIfAllPlayersAnswered(pin) {
 
     io.to(pin).emit(
       "show_feedback",
-      room.players,
+      getCleanPlayersList(room.players),
       isLastQuestion,
       questions[room.currentQuestionIndex],
     ); //show_feedback -- round_finished
 
     setTimeout(() => {
-      io.to(pin).emit("round_finished", room.players, isLastQuestion);
+      io.to(pin).emit(
+        "round_finished",
+        getCleanPlayersList(room.players),
+        isLastQuestion,
+      );
     }, 5000);
   }
 }
@@ -116,7 +130,10 @@ io.on("connection", (socket) => {
 
     console.log(`Sala criada com o PIN: ${pin} pelo host: ${socket.id}`);
 
-    socket.emit("room_created", { pin, players: rooms[pin].players });
+    socket.emit("room_created", {
+      pin,
+      players: getCleanPlayersList(rooms[pin].players),
+    });
   });
 
   socket.on("join_room", (data) => {
@@ -152,13 +169,7 @@ io.on("connection", (socket) => {
       token: token,
     });
 
-    const playersInTheRoom = rooms[data.pin].players.map((player) => ({
-      id: player.id,
-      nickname: player.nickname,
-      role: player.role,
-      hasAlreadyAnswered: player.hasAlreadyAnswered,
-      points: player.points,
-    }));
+    const playersInTheRoom = getCleanPlayersList(rooms[data.pin].players);
 
     socket.emit("joined_room", {
       pin: data.pin,
@@ -258,7 +269,49 @@ io.on("connection", (socket) => {
     rooms[data.pin].currentQuestionIndex = 0;
     rooms[data.pin].state = "LOBBY_HOST";
 
-    io.to(data.pin).emit("game_restarted", rooms[data.pin].players);
+    io.to(data.pin).emit(
+      "game_restarted",
+      getCleanPlayersList(rooms[data.pin].players),
+    );
+  });
+  
+  socket.on("kick_player", (data) => {
+    console.log("KICK PLAYER", data);
+    let room = rooms[data.pin];
+
+    if (!room) {
+      return socket.emit("error", "Room doesn't exist");
+    }
+
+    if (socket.id !== room.hostId) {
+      return socket.emit("error", "Only the host can kick players");
+    }
+
+    if (room.state !== "LOBBY_HOST") {
+      return socket.emit(
+        "error",
+        "Cannot kick players after the game has started",
+      );
+    }
+
+    let playerId = data.playerId;
+
+    const playerToKick = room.players.find((player) => player.id === playerId);
+
+    if (!playerToKick) {
+      return socket.emit("error", "Player not found in the room");
+    }
+
+    room.players = room.players.filter((player) => player.id !== playerId);
+
+    io.sockets.sockets.get(playerId)?.leave(data.pin); // Make the kicked player leave the room
+
+    io.to(playerId).emit(
+      "kicked_from_room",
+      "You have been kicked from the room.",
+    );
+
+    io.to(data.pin).emit("update_players", getCleanPlayersList(room.players));
   });
 
   socket.on("end_game", (data) => {
@@ -303,7 +356,7 @@ io.on("connection", (socket) => {
     socket.join(pin);
     socket.pin = pin;
 
-    io.to(pin).emit("update_players", room.players);
+    io.to(pin).emit("update_players", getCleanPlayersList(room.players));
 
     const currentQuestion =
       room.state === "IN_GAME" ? questions[room.currentQuestionIndex] : null;
@@ -317,7 +370,7 @@ io.on("connection", (socket) => {
     );
 
     socket.emit("reconnected_success", {
-      myPlayer: playerToReconnect,
+      myPlayer: getCleanPlayersList([playerToReconnect])[0],
       roomState: room.state,
       currentQuestion: currentQuestion
         ? {
@@ -367,7 +420,7 @@ io.on("connection", (socket) => {
       `Jogador saiu da sala ${pin}. Restam ${room.players.length} jogadores.`,
     );
 
-    io.to(pin).emit("update_players", room.players);
+    io.to(pin).emit("update_players", getCleanPlayersList(room.players));
     checkIfAllPlayersAnswered(pin);
   });
 });
