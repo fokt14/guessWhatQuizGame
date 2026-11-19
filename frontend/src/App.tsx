@@ -26,7 +26,6 @@ function App() {
   const [isLastQuestion, setIsLastQuestion] = useState(false);
   const [myRole, setMyRole] = useState<"HOST" | "PLAYER" | null>(null);
   const [myPlayer, setMyPlayer] = useState<Player | null>(null);
-  const [correctIndexAnswer, setCorrectIndexAnswer] = useState<number | null>(null);
 
 
   const handleCreateRoom = () => {
@@ -158,7 +157,6 @@ function App() {
       setMyPlayer(foundMyPlayer || null);
       setMyRole(foundMyPlayer?.role || null);
 
-      setCorrectIndexAnswer(question.correctAnswerIndex);
       setCurrentQuestion(question);
     });
 
@@ -254,15 +252,15 @@ function App() {
 
   if (stateOfPlayer === 'LOBBY_PLAYER') {
     return (
-      <div className="flex min-h-screen items-center justify-center  text-white flex-col gap-4">
-        <div className="flex flex-col items-center justify-center gap-4 border-2 border-black text-black p-4 rounded-lg w-1/3 min-h-80 bg-blue-200">
-          <h1 className="text-3xl font-bold">You are in! </h1>
-          <p className="text-xl text-slate-400">Wait for the host...</p>
-          <h2 className="text-2xl font-semibold">Room PIN: {pin}</h2>
-          <h3 className="text-xl font-semibold">Players in the room ({players.length}) : {MAX_PLAYERS_IN_ROOM}</h3>
-          <ul className="flex flex-wrap gap-2 justify-center">
+      <div className="flex min-h-dvh w-full items-center justify-center px-4 py-6 text-white">
+        <div className="flex min-h-80 w-full max-w-md flex-col items-center justify-center gap-4 rounded-lg border-2 border-black bg-blue-200 p-4 text-center text-black sm:p-6">
+          <h1 className="text-2xl font-bold sm:text-3xl">You are in! </h1>
+          <p className="text-base text-slate-600 sm:text-xl">Wait for the host...</p>
+          <h2 className="text-xl font-semibold sm:text-2xl">Room PIN: {pin}</h2>
+          <h3 className="text-base font-semibold sm:text-xl">Players in the room ({players.length}) / {MAX_PLAYERS_IN_ROOM}</h3>
+          <ul className="flex max-w-full flex-wrap justify-center gap-2">
             {players.map((player) => (
-              <li key={player.id} className="bg-white text-black px-3 py-1 rounded-full text-sm font-semibold">{player.nickname}</li>
+              <li key={player.id} className="max-w-full break-all rounded-full bg-white px-3 py-1 text-sm font-semibold text-black">{player.nickname}</li>
             ))}
           </ul>
         </div>
@@ -277,36 +275,38 @@ function App() {
   // RETURNING UI FOR MENU AND LOBBY HOST STATES
   return (
     <>
-      <div className='flex min-h-screen w-full items-center justify-center flex-col'>
-        <div className='flex flex-col items-center justify-center gap-4 border-2 border-black p-4 rounded-lg w-1/3 min-h-80 bg-blue-200'>
+      <div className='flex min-h-dvh w-full items-center justify-center px-4 py-6'>
+        <div className='flex min-h-80 w-full max-w-md flex-col items-center justify-center gap-4 rounded-lg border-2 border-black bg-blue-200 p-4 sm:p-6'>
 
-          <div className='flex' >
-            <span className='flex gap-2 items-center justify-center font-bold'>
+          <div className='flex w-full' >
+            <span className='flex w-full flex-col gap-2 font-bold sm:flex-row sm:items-center sm:justify-center'>
               Nickname: <input
                 type="text"
                 placeholder="Your Nickname.."
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
+                disabled={Boolean(pin)}
+                className="w-full rounded-lg border border-slate-600 bg-white px-3 py-2 font-normal outline-none focus:border-blue-500 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 sm:max-w-56"
               />
             </span>
           </div>
 
           {!pin ? (
             <div className='flex flex-col gap-5 mt-4'>
-              <div className='flex flex-row gap-5'>
-                <button className='border-2 rounded-4xl p-3 hover:bg-blue-400 cursor-pointer' onClick={handleCreateRoom}>Create room</button>
-                <button className='border-2 rounded-4xl p-3 hover:bg-blue-400 cursor-pointer' onClick={openJoinRoomModal}>Join room</button>
+              <div className='flex w-full flex-col gap-3 sm:flex-row sm:gap-5'>
+                <button className='border-2 rounded-4xl p-3 hover:bg-blue-400 cursor-pointer w-full sm:w-auto' onClick={handleCreateRoom}>Create room</button>
+                <button className='border-2 rounded-4xl p-3 hover:bg-blue-400 cursor-pointer w-full sm:w-auto' onClick={openJoinRoomModal}>Join room</button>
               </div>
             </div>
           ) : ( //Lobby Host View
             <div className='flex flex-col gap-2 items-center justify-center mt-4'>
               <h2 className='font-bold'>Room PIN:</h2>
-              <h1 className='text-4xl font-black'>{pin}</h1>
-              <h3 className='font-bold mt-4'>Players in the room ({players.length}) : {MAX_PLAYERS_IN_ROOM}</h3>
-              <ul className='flex flex-wrap gap-2 justify-center'>
+              <h1 className='text-3xl font-black sm:text-4xl'>{pin}</h1>
+              <h3 className='font-bold mt-4 text-center'>Players in the room ({players.length}) / {MAX_PLAYERS_IN_ROOM}</h3>
+              <ul className='flex max-w-full flex-wrap gap-2 justify-center'>
                 {players.map((player) => (
-                  <div className='bg-white px-3 py-1 rounded-full text-sm font-semibold flex items-center justify-center' key={player.id}>
-                    <li key={player.id} className=''>{player.nickname}</li>
+                  <div className='max-w-full bg-white px-3 py-1 rounded-full text-sm font-semibold flex items-center justify-center' key={player.id}>
+                    <li key={player.id} className='min-w-0 break-all'>{player.nickname}</li>
                     {player.id !== socket.id && (
                       <button
                         type='button'

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import type { Player, Question } from "../interfaces/interfaces";
-import questions from "../../../server/questions.js";
 
 
 
@@ -26,16 +25,16 @@ export default function FeedBackScreen({ myPlayer, question }: FeedBackScreenPro
     return (
         <>
         
-            <div className={`min-h-screen w-full flex flex-col items-center justify-center transition-colors duration-500 ${isCorrectAnswer ? 'bg-green-500' : 'bg-red-500'} text-white px-4`}>
-                <h1 className="text-6xl md:text-8xl font-black tracking-widest uppercase mb-4 text-center drop-shadow-md">
+            <div className={`flex min-h-dvh w-full flex-col items-center justify-center px-4 py-6 text-center transition-colors duration-500 ${isCorrectAnswer ? 'bg-green-500' : 'bg-red-500'} text-white`}>
+                <h1 className="mb-6 text-4xl font-black uppercase tracking-widest drop-shadow-md sm:mb-8 sm:text-6xl md:text-8xl">
                     {isCorrectAnswer ? 'CORRECT' : 'INCORRECT'}
                 </h1>
 
-                <div className="text-center mb-16">
-                    <p className="text-lg md:text-xl font-medium text-white/80 mb-2">
+                <div className="mb-12 text-center sm:mb-16">
+                    <p className="mb-2 text-base font-medium text-white/80 sm:text-lg md:text-xl">
                         Correct answer:
                     </p>
-                    <p className="text-2xl md:text-4xl font-bold max-w-2xl px-6 py-4 bg-black/20 rounded-xl shadow-inner">
+                    <p className="max-w-2xl rounded-xl bg-black/20 px-4 py-4 text-xl font-bold shadow-inner sm:px-6 sm:text-2xl md:text-4xl">
                         {question?.answers[question.correctAnswerIndex]}
                     </p>
                 </div>

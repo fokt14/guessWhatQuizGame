@@ -45,20 +45,20 @@ export default function GameScreen({ currentQuestion, onAnswerSubmitted }: GameS
 
     return (
         <>
-            <div className="w-full min-h-screen flex flex-col items-center justify-center content-center gap-4">
-                <div className="text-center items-center justify-center flex flex-col gap-4">
-                    <div className={`w-20 h-20 rounded-full flex items-center justify-center text-3xl font-black mb-6 transition-colors duration-300 ${timeLeft <= 5 ? 'bg-red-600 text-white animate-pulse' : 'bg-white text-slate-900'
+            <div className="flex min-h-dvh w-full flex-col items-center justify-center gap-4 px-4 py-6">
+                <div className="flex flex-col items-center justify-center gap-3 text-center">
+                    <div className={`mb-2 flex h-16 w-16 items-center justify-center rounded-full text-2xl font-black transition-colors duration-300 sm:h-20 sm:w-20 sm:text-3xl ${timeLeft <= 5 ? 'bg-red-600 text-white animate-pulse' : 'bg-white text-slate-900'
                         }`}>
                         {timeLeft}
                     </div>
-                    <h1 className="text-4xl md:text-5xl font-black text-black">{currentQuestion.question}</h1>
+                    <h1 className="max-w-3xl text-2xl font-black text-black sm:text-4xl md:text-5xl">{currentQuestion.question}</h1>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl mt-4">
+                <div className="mt-2 grid w-full max-w-2xl grid-cols-1 gap-3 sm:mt-4 sm:grid-cols-2 sm:gap-4">
                     {currentQuestion.answers.map((answer: string, index: number) => (
                         <button
                             key={index}
                             onClick={() => handleAnswer(index)}
-                            className={`border-2 rounded-2xl p-6 text-white text-xl font-bold ${hasAnswered ? 'bg-slate-500 opacity-50 cursor-not-allowed' : 'bg-slate-900 hover:bg-slate-600 transition-colors cursor-pointer w-full'}`}
+                            className={`w-full rounded-2xl border-2 p-4 text-base font-bold text-white sm:p-6 sm:text-xl ${hasAnswered ? 'bg-slate-500 opacity-50 cursor-not-allowed' : 'bg-slate-900 hover:bg-slate-600 transition-colors cursor-pointer'}`}
                         >
                             {answer}
                         </button>

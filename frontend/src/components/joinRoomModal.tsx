@@ -36,7 +36,7 @@ export default function JoinRoomModal({ isOpen, onClose, onJoin, nickname }: Joi
             >
                 <div
                     onClick={(e) => e.stopPropagation()}
-                    className="w-full max-w-md rounded-2xl bg-blue-200 border   border-slate-800 p-6 shadow-2xl  flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150"
+                    className="flex w-full max-w-md flex-col gap-4 rounded-2xl border border-slate-800 bg-blue-200 p-4 shadow-2xl animate-in fade-in zoom-in-95 duration-150 sm:p-6"
                 >
                     <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                         <h3 className="text-xl font-bold">{'Join Room'}</h3>
@@ -48,9 +48,16 @@ export default function JoinRoomModal({ isOpen, onClose, onJoin, nickname }: Joi
                             ✕
                         </button>
                     </div>
-                    <div className="flex flex-col gap-4 align-center justify-center items-center">
-                        <input type="text" placeholder="Enter PIN" value={pin} onChange={(e) => setPin(e.target.value)} />
-                        <button className='bg-slate-900 border-2 border-blue-500 rounded-2xl w-28 text-white min-h-9 hover:bg-slate-600 cursor-pointer' onClick={handleJoin}>Join</button>
+                    <div className="flex flex-col items-center justify-center gap-4">
+                        <input
+                            type="text"
+                            inputMode="numeric"
+                            placeholder="Enter PIN"
+                            value={pin}
+                            onChange={(e) => setPin(e.target.value)}
+                            className="w-full rounded-xl border border-slate-600 bg-white px-4 py-3 text-center text-lg outline-none focus:border-blue-500"
+                        />
+                        <button className='min-h-11 w-full rounded-2xl border-2 border-blue-500 bg-slate-900 text-white hover:bg-slate-600 cursor-pointer sm:w-28' onClick={handleJoin}>Join</button>
                     </div>
                 </div>
             </div>
