@@ -2,3 +2,4 @@ node_modules
 firebase-key.json
 questions.js
 uploadQuestion.js
+.env

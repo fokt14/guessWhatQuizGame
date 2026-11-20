@@ -2,7 +2,7 @@ import type { GameState } from '../interfaces/enums';
 
 
 interface LandingPageProps {
-    setStateOfPlayer: (state: GameState) => GameState;
+    setStateOfPlayer: (state: GameState) => void;
 }
 
 export default function LandingPageScreen({ setStateOfPlayer }: LandingPageProps) {

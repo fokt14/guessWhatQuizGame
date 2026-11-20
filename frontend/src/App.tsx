@@ -11,7 +11,8 @@ import FeedBackScreen from './components/FeedBackScreen';
 import deleteFriendIcon from './assets/delete-friend-svgrepo-com.svg';
 
 
-const socket = io('http://localhost:3000');
+const serverUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
+const socket = io(serverUrl);
 
 const MAX_PLAYERS_IN_ROOM = 10;
 

@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
@@ -15,10 +16,23 @@ initializeApp({
   projectId: serviceAccount.project_id,
 });
 
+const PORT = process.env.PORT || 3001;
+
 const db = getFirestore();
 
 const app = express();
-app.use(cors());
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
+  }),
+);
 
 const server = http.createServer(app);
 
@@ -27,7 +41,7 @@ const QUESTION_DURATION_SECONDS = 15;
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
   },
 });
@@ -543,6 +557,10 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(3000, () => {
-  console.log("Servidor Socket.io a correr na porta 3000");
+app.get("/", (req, res) => {
+  res.send("GuessWhat Server is running!");
+});
+
+server.listen(PORT, () => {
+  console.log("Servidor Socket.io a correr na porta " + PORT);
 });
