@@ -56,7 +56,7 @@ function App() {
   };
 
   const handleRemovePlayer = (playerId: string) => {
-    console.log("Removing player with ID:", playerId);
+    // console.log("Removing player with ID:", playerId);
     socket.emit('kick_player', { pin: pin, playerId: playerId });
   }
 
@@ -73,7 +73,7 @@ function App() {
     setErrorMessage('');
 
 
-    console.log("oi", nickname, pinFromModal)
+    // console.log("oi", nickname, pinFromModal)
 
     if (!nickname) {
       setErrorMessage('Please fill in both PIN and Nickname.');
@@ -89,7 +89,7 @@ function App() {
   }
 
   const handleAnswerSubmitted = (selectedAnswerIndex: number) => {
-    console.log("Answer submitted:", selectedAnswerIndex);
+    // console.log("Answer submitted:", selectedAnswerIndex);
     socket.emit('submit_answer', { pin: pin, answerIndex: selectedAnswerIndex });
   }
 
@@ -125,7 +125,7 @@ function App() {
     });
 
     socket.on('room_created', (data: { pin: string, players: Player[] }) => {
-      console.log('Chegou ao cliente!', data);
+      // console.log('Chegou ao cliente!', data);
       setPlayers(data.players);
       setPin(data.pin);
       setMyPlayer(data.players.find(player => player.id === socket.id) || null);
@@ -133,7 +133,7 @@ function App() {
     });
 
     socket.on("joined_room", (data: { pin: string, players: Player[], mySecretToken: string }) => {
-      console.log("Joined room:", data);
+      // console.log("Joined room:", data);
       setStateOfPlayer('LOBBY_PLAYER');
       setPlayers(data.players);
       setPin(data.pin);
@@ -146,25 +146,25 @@ function App() {
     });
 
     socket.on("update_players", (updatedList: Player[]) => {
-      console.log("Lista de jogadores recebida:", updatedList);
+      // console.log("Lista de jogadores recebida:", updatedList);
       setPlayers(updatedList);
       setMyPlayer(updatedList.find(player => player.id === socket.id) || null);
     });
 
     socket.on("new_question", (question: any) => {
-      console.log("QUESTAO:", question);
+      // console.log("QUESTAO:", question);
       setStateOfPlayer('IN_GAME');
       setCurrentQuestion(question);
     });
 
     socket.on("show_feedback", (players: Player[], isLastQuestion: boolean, question: Question) => {
-      console.log("PLAYERS FA :", question, players);
+      // console.log("PLAYERS FA :", question, players);
       setStateOfPlayer('FEEDBACK');
       setPlayers(players);
 
       let foundMyPlayer = players.find(player => player.id === socket.id);
 
-      console.log("isLastQuestion:", isLastQuestion);
+      // console.log("isLastQuestion:", isLastQuestion);
 
       setIsLastQuestion(isLastQuestion);
 
@@ -175,15 +175,15 @@ function App() {
     });
 
     socket.on("round_finished", (players: Player[], isLastQuestion: boolean) => {
-      console.log("PLAYERS :", players);
+      // console.log("PLAYERS :", players);
       setPlayers(players);
-      console.log(" round -fi nexisLastQuestion:", isLastQuestion);
+      // console.log(" round -fi nexisLastQuestion:", isLastQuestion);
       setIsLastQuestion(isLastQuestion);
       setStateOfPlayer('ROUND_RESULTS');
     });
 
     socket.on("game_restarted", (players: Player[]) => {
-      console.log("Game restarted, players:", players);
+      // console.log("Game restarted, players:", players);
       setPlayers(players);
 
       let myPlayer = players.find(player => player.id === socket.id);
@@ -208,7 +208,7 @@ function App() {
     });
 
     socket.on("error", (message: string) => {
-      console.error("Error from server:", message);
+      // console.error("Error from server:", message);
       setErrorMessage(message);
     });
 
@@ -224,7 +224,7 @@ function App() {
     }
 
     socket.on("reconnect_failed_kicked_or_closed", (message: string) => {
-      console.log(message);
+      // console.log(message);
       setErrorMessage(message);
       setStateOfPlayer('MENU');
       setPin('');
