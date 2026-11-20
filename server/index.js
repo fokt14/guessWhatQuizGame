@@ -45,8 +45,12 @@ const QUESTION_DURATION_SECONDS = 15;
 
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: [
+      "https://guess-what-quiz-game.vercel.app",
+      "http://localhost:5173",
+    ],
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 
