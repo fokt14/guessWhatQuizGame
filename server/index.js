@@ -42,6 +42,7 @@ function getCleanPlayersList(players) {
     role: player.role,
     hasAlreadyAnswered: player.hasAlreadyAnswered,
     points: player.points,
+    isOnline: player.isOnline !== false,
     lastAnswerIndex: player.lastAnswerIndex ?? null,
   }));
 }
@@ -436,6 +437,38 @@ io.on("connection", (socket) => {
     );
   });
 
+  socket.on("leave_room", (data) => {
+    console.log("LEAVE ROOM", data);
+
+    const { pin, role } = data;
+
+    if (!rooms[pin]) {
+      return socket.emit("error", "Room doesn't exist");
+    }
+
+    const room = rooms[pin];
+
+    if (role === "HOST") {
+      console.log(`O host da sala ${pin} saiu. A sala será encerrada.`);
+      clearTimeout(room.roundTimer);
+      delete rooms[pin];
+      io.to(pin).emit("game_ended");
+      return;
+    }
+
+    const leavingPlayerIndex = room.players.findIndex(
+      (p) => p.id === socket.id,
+    );
+
+    if (leavingPlayerIndex !== -1) {
+      room.players.splice(leavingPlayerIndex, 1);
+      console.log(
+        `Jogador saiu da sala ${pin}. Restam ${room.players.length} jogadores.`,
+      );
+      io.to(pin).emit("update_players", getCleanPlayersList(room.players));
+    }
+  });
+
   socket.on("disconnect", () => {
     console.log(`Cliente desconectado: ${socket.id}`);
 
@@ -461,11 +494,15 @@ io.on("connection", (socket) => {
       return;
     }
 
-    leavingPlayer.isOnline = false; // Mark the player as offline instead of removing them
+    if (room.state === "LOBBY_HOST") {
+      room.players = room.players.filter((p) => p.id !== socket.id);
+    } else {
+      leavingPlayer.isOnline = false; // Mark the player as offline instead of removing them
 
-    console.log(
-      `Jogador saiu da sala ${pin}. Restam ${room.players.length} jogadores.`,
-    );
+      console.log(
+        `Jogador saiu da sala ${pin}. Restam ${room.players.length} jogadores.`,
+      );
+    }
 
     io.to(pin).emit("update_players", getCleanPlayersList(room.players));
     checkIfAllPlayersAnswered(pin);

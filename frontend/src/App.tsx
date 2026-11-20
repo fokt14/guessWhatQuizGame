@@ -28,6 +28,19 @@ function App() {
   const [myPlayer, setMyPlayer] = useState<Player | null>(null);
 
 
+  const handleReturnToMenu = (myRole: any) => {
+    setStateOfPlayer('MENU');
+    setPin('');
+    setPlayers([]);
+    setMyPlayer(null);
+    setMyRole(null);
+    sessionStorage.removeItem('lastRoomPin');
+    sessionStorage.removeItem('playerToken');
+
+    socket.emit('leave_room', { pin: pin, role: myRole });
+
+  }
+
   const handleCreateRoom = () => {
     setErrorMessage('');
 
@@ -255,6 +268,7 @@ function App() {
       <div className="flex min-h-dvh w-full items-center justify-center px-4 py-6 text-white">
         <div className="flex min-h-80 w-full max-w-md flex-col items-center justify-center gap-4 rounded-lg border-2 border-black bg-blue-200 p-4 text-center text-black sm:p-6">
           <h1 className="text-2xl font-bold sm:text-3xl">You are in! </h1>
+          <button className='border-2 rounded-4xl p-3 hover:bg-blue-400 cursor-pointer' onClick={() => handleReturnToMenu(myRole)}>Return</button>
           <p className="text-base text-slate-600 sm:text-xl">Wait for the host...</p>
           <h2 className="text-xl font-semibold sm:text-2xl">Room PIN: {pin}</h2>
           <h3 className="text-base font-semibold sm:text-xl">Players in the room ({players.length}) / {MAX_PLAYERS_IN_ROOM}</h3>
@@ -300,6 +314,7 @@ function App() {
             </div>
           ) : ( //Lobby Host View
             <div className='flex flex-col gap-2 items-center justify-center mt-4'>
+              <button className='border-2 rounded-4xl p-3 hover:bg-blue-400 cursor-pointer' onClick={() => handleReturnToMenu(myRole)}>Return</button>
               <h2 className='font-bold'>Room PIN:</h2>
               <h1 className='text-3xl font-black sm:text-4xl'>{pin}</h1>
               <h3 className='font-bold mt-4 text-center'>Players in the room ({players.length}) / {MAX_PLAYERS_IN_ROOM}</h3>
