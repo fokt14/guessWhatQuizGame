@@ -1,4 +1,5 @@
 export type GameState = 
+  | "LANDING"
   | "MENU" // In the menu, before joining or creating a room
   | "LOBBY_HOST"  // In the lobby, waiting for players to join (host)
   | "LOBBY_PLAYER" // In the lobby, waiting for players to join (player)

@@ -4,6 +4,7 @@ import { io } from 'socket.io-client';
 import JoinRoomModal from './components/joinRoomModal';
 import GameScreen from './components/GameScreen';
 import LeaderBoardScreen from './components/LeaderBoardScreen';
+import LandingPageScreen from './components/LandingPageScreen';
 import type { Question, Player } from './interfaces/interfaces';
 import type { GameState } from './interfaces/enums';
 import FeedBackScreen from './components/FeedBackScreen';
@@ -20,7 +21,7 @@ function App() {
   const [nickname, setNickname] = useState(() => sessionStorage.getItem('nickname') ?? '');
   const [players, setPlayers] = useState<Player[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
-  const [stateOfPlayer, setStateOfPlayer] = useState<GameState>('MENU'); // MENU, LOBBY_HOST, LOBBY_PLAYER, IN_GAME, GAME_OVER
+  const [stateOfPlayer, setStateOfPlayer] = useState<GameState>('LANDING'); // MENU, LOBBY_HOST, LOBBY_PLAYER, IN_GAME, GAME_OVER, ROUND_RESULTS, FEEDBACK 
   const [isJoinRoomModalOpen, setIsJoinRoomModalOpen] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [isLastQuestion, setIsLastQuestion] = useState(false);
@@ -253,6 +254,10 @@ function App() {
   }, []);
 
   //RETURNING UI BASED ON STATE OF PLAYER
+
+  if (stateOfPlayer === 'LANDING') {
+    return <LandingPageScreen setStateOfPlayer={setStateOfPlayer} />;
+  }
 
   if (stateOfPlayer === 'IN_GAME' && currentQuestion) {
     return <GameScreen currentQuestion={currentQuestion} onAnswerSubmitted={handleAnswerSubmitted} />;
