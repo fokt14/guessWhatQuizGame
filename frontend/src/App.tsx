@@ -265,18 +265,43 @@ function App() {
 
   if (stateOfPlayer === 'LOBBY_PLAYER') {
     return (
-      <div className="flex min-h-dvh w-full items-center justify-center px-4 py-6 text-white">
-        <div className="flex min-h-80 w-full max-w-md flex-col items-center justify-center gap-4 rounded-lg border-2 border-black bg-blue-200 p-4 text-center text-black sm:p-6">
-          <h1 className="text-2xl font-bold sm:text-3xl">You are in! </h1>
-          <button className='border-2 rounded-4xl p-3 hover:bg-blue-400 cursor-pointer' onClick={() => handleReturnToMenu(myRole)}>Return</button>
-          <p className="text-base text-slate-600 sm:text-xl">Wait for the host...</p>
-          <h2 className="text-xl font-semibold sm:text-2xl">Room PIN: {pin}</h2>
-          <h3 className="text-base font-semibold sm:text-xl">Players in the room ({players.length}) / {MAX_PLAYERS_IN_ROOM}</h3>
-          <ul className="flex max-w-full flex-wrap justify-center gap-2">
+      <div className="flex min-h-dvh w-full items-center justify-center bg-[url('/caminho-da-tua-onda.jpg')] bg-cover bg-center bg-fixed px-4 py-6 font-sans">
+
+        {/* Cartão de Vidro Azul */}
+        <div className="flex min-h-80 w-full max-w-sm md:max-w-xl lg:max-w-3xl flex-col items-center justify-center gap-6 rounded-3xl border border-blue-400/30 bg-blue-500/20 backdrop-blur-md p-6 md:p-10 lg:p-14 shadow-2xl transition-all duration-300 text-center">
+
+          <h1 className="text-4xl font-black  text-black md:text-5xl drop-shadow-md">You are in!</h1>
+
+          <p className="text-lg md:text-xl font-bold  text-black/80 animate-pulse">
+            Wait for the host to start...
+          </p>
+
+          <h2 className="text-2xl font-bold  text-black mt-2 md:text-3xl">
+            Room PIN: <span className="font-black tracking-widest">{pin}</span>
+          </h2>
+
+          <h3 className="text-lg font-bold  text-black mt-4 md:text-xl">
+            Players in the room ({players.length}) / {MAX_PLAYERS_IN_ROOM}
+          </h3>
+
+          <ul className="flex max-w-full flex-wrap justify-center gap-3">
             {players.map((player) => (
-              <li key={player.id} className="max-w-full break-all rounded-full bg-white px-3 py-1 text-sm font-semibold text-black">{player.nickname}</li>
+              <div
+                className="flex max-w-full items-center justify-center rounded-full bg-white/90 px-4 py-2 text-base font-bold text-gray-900 shadow-sm md:px-5 md:py-3 md:text-lg"
+                key={player.id}
+              >
+                <li className="min-w-0 break-all">{player.nickname}</li>
+              </div>
             ))}
           </ul>
+
+          <button
+            className="mt-6 w-full rounded-2xl border-b-4 border-slate-700 bg-slate-500 p-4 text-xl font-bold text-white shadow-lg transition-all duration-150 hover:bg-slate-400 active:translate-y-1 active:scale-95 sm:w-auto md:px-10 md:py-4"
+            onClick={() => handleReturnToMenu(myRole)}
+          >
+            Leave Room
+          </button>
+
         </div>
       </div>
     );
@@ -289,57 +314,88 @@ function App() {
   // RETURNING UI FOR MENU AND LOBBY HOST STATES
   return (
     <>
-      <div className='flex min-h-dvh w-full items-center justify-center px-4 py-6'>
-        <div className='flex min-h-80 w-full max-w-md flex-col items-center justify-center gap-4 rounded-lg border-2 border-black bg-blue-200 p-4 sm:p-6'>
+      <div className="flex min-h-dvh w-full items-center justify-center bg-[url('/caminho-da-tua-onda.jpg')] bg-cover bg-center bg-fixed px-4 py-6 font-sans">
 
-          <div className='flex w-full' >
-            <span className='flex w-full flex-col gap-2 font-bold sm:flex-row sm:items-center sm:justify-center'>
-              Nickname: <input
+        <div className="flex min-h-80 w-full max-w-sm md:max-w-xl lg:max-w-3xl flex-col items-center justify-center gap-6 rounded-3xl border border-black bg-blue-500/20 backdrop-blur-md p-6 md:p-10 lg:p-14 shadow-2xl transition-all duration-300">
+          <div className="flex w-full">
+            <span className="flex w-full flex-col gap-3 font-bold text-black md:flex-row md:items-center md:justify-center md:text-xl">
+              Nickname:
+              <input
                 type="text"
-                placeholder="Your Nickname.."
+                placeholder="Your's nickname"
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
                 disabled={Boolean(pin)}
-                className="w-full rounded-lg border border-slate-600 bg-white px-3 py-2 font-normal outline-none focus:border-blue-500 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 sm:max-w-56"
+                className="w-full rounded-2xl border-4 border-transparent bg-white/90 p-4 text-center text-lg font-bold text-gray-900 shadow-inner outline-none transition-all placeholder:text-gray-400 focus:border-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 md:max-w-xs md:p-5 md:text-2xl"
               />
             </span>
           </div>
 
           {!pin ? (
-            <div className='flex flex-col gap-5 mt-4'>
-              <div className='flex w-full flex-col gap-3 sm:flex-row sm:gap-5'>
-                <button className='border-2 rounded-4xl p-3 hover:bg-blue-400 cursor-pointer w-full sm:w-auto' onClick={handleCreateRoom}>Create room</button>
-                <button className='border-2 rounded-4xl p-3 hover:bg-blue-400 cursor-pointer w-full sm:w-auto' onClick={openJoinRoomModal}>Join room</button>
-              </div>
+            <div className="mt-6 flex w-full flex-col gap-4 sm:flex-row sm:justify-center">
+              <button
+                className="w-full rounded-2xl border-b-4 border-blue-700 bg-blue-500 p-4 text-xl font-bold text-white shadow-lg transition-all duration-150 hover:bg-blue-400 active:translate-y-1 active:scale-95 sm:w-auto md:p-5 md:text-2xl"
+                onClick={handleCreateRoom}
+              >
+                Create room
+              </button>
+              <button
+                className="w-full rounded-2xl border-b-4 border-emerald-700 bg-emerald-500 p-4 text-xl font-bold text-white shadow-lg transition-all duration-150 hover:bg-emerald-400 active:translate-y-1 active:scale-95 sm:w-auto md:p-5 md:text-2xl"
+                onClick={openJoinRoomModal}
+              >
+                Join room
+              </button>
             </div>
-          ) : ( //Lobby Host View
-            <div className='flex flex-col gap-2 items-center justify-center mt-4'>
-              <button className='border-2 rounded-4xl p-3 hover:bg-blue-400 cursor-pointer' onClick={() => handleReturnToMenu(myRole)}>Return</button>
-              <h2 className='font-bold'>Room PIN:</h2>
-              <h1 className='text-3xl font-black sm:text-4xl'>{pin}</h1>
-              <h3 className='font-bold mt-4 text-center'>Players in the room ({players.length}) / {MAX_PLAYERS_IN_ROOM}</h3>
-              <ul className='flex max-w-full flex-wrap gap-2 justify-center'>
+          ) : (
+            // Lobby Host View
+            <div className="mt-4 flex w-full flex-col items-center justify-center gap-4 text-black">
+              <h2 className="text-xl font-bold text-black/80">Room PIN:</h2>
+              <h1 className="text-5xl font-black tracking-widest md:text-7xl">{pin}</h1>
+
+              <h3 className="mt-6 text-lg font-bold md:text-xl">
+                Players in the room ({players.length}) / {MAX_PLAYERS_IN_ROOM}
+              </h3>
+
+              <ul className="flex max-w-full flex-wrap justify-center gap-3">
                 {players.map((player) => (
-                  <div className='max-w-full bg-white px-3 py-1 rounded-full text-sm font-semibold flex items-center justify-center' key={player.id}>
-                    <li key={player.id} className='min-w-0 break-all'>{player.nickname}</li>
+                  <div className="flex max-w-full items-center justify-center rounded-full bg-white/90 px-4 py-2 text-base font-bold text-gray-900 shadow-sm md:px-5 md:py-3 md:text-lg" key={player.id}>
+                    <li key={player.id} className="min-w-0 break-all">{player.nickname}</li>
                     {player.id !== socket.id && (
                       <button
-                        type='button'
-                        className='ml-2 w-5 h-5 flex items-center justify-center cursor-pointer hover:scale-110 transition-transform'
+                        type="button"
+                        className="ml-3 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full hover:scale-110 hover:bg-red-100 transition-all"
                         aria-label={`Remove ${player.nickname}`}
                         onClick={() => handleRemovePlayer(player.id)}
                       >
-                        <img src={deleteFriendIcon} alt='' className='w-4 h-4' />
-                      </button>)
-                    }
+                        <img src={deleteFriendIcon} alt="Kick" className="h-5 w-5 opacity-70" />
+                      </button>
+                    )}
                   </div>
                 ))}
               </ul>
-              <button onClick={handleStartGame} className='border-2 bg-green-500 text-white font-bold rounded-4xl p-3 hover:bg-green-600 cursor-pointer mt-4'>Start game</button>
+
+              <div className="mt-8 flex w-full flex-col gap-4 sm:flex-row sm:justify-center">
+                <button
+                  onClick={() => handleReturnToMenu(myRole)}
+                  className="w-full rounded-2xl border-b-4 border-slate-700 bg-slate-500 p-4 text-xl font-bold text-white shadow-lg transition-all duration-150 hover:bg-slate-400 active:translate-y-1 active:scale-95 sm:w-auto md:p-5"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleStartGame}
+                  className="w-full rounded-2xl border-b-4 border-green-700 bg-green-500 p-4 text-xl font-bold text-white shadow-lg transition-all duration-150 hover:bg-green-400 active:translate-y-1 active:scale-95 sm:w-auto md:px-10 md:py-5 md:text-2xl"
+                >
+                  Start game
+                </button>
+              </div>
             </div>
           )}
 
-          {errorMessage ? (<p className='text-red-500 font-bold mt-2'>{errorMessage}</p>) : null}
+          {errorMessage && (
+            <p className="mt-4 rounded-xl bg-red-500/20 px-4 py-2 font-bold text-gray-500 border border-red-500/50">
+              {errorMessage}
+            </p>
+          )}
         </div>
       </div>
 
