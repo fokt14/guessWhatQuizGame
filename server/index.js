@@ -1,9 +1,21 @@
-import questions from "./questions.js";
-
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
+import { initializeApp, cert } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
+import fs from "fs";
+
+const serviceAccount = JSON.parse(
+  fs.readFileSync("./firebase-key.json", "utf8"),
+);
+
+initializeApp({
+  credential: cert(serviceAccount),
+  projectId: serviceAccount.project_id,
+});
+
+const db = getFirestore();
 
 const app = express();
 app.use(cors());
@@ -49,9 +61,9 @@ function getCleanPlayersList(players) {
 
 function sendQuestion(pin) {
   const room = rooms[pin];
-  const currentQ = questions[room.currentQuestionIndex];
 
   if (!room) return;
+  const currentQ = room.questions[room.currentQuestionIndex];
 
   if (!currentQ) {
     room.state = "GAME_OVER";
@@ -62,7 +74,7 @@ function sendQuestion(pin) {
 
   const questionToSend = {
     questionIndex: room.currentQuestionIndex,
-    totalQuestions: questions.length,
+    totalQuestions: room.questions.length,
     question: currentQ.question,
     answers: currentQ.answers,
     correctAnswerIndex: currentQ.correctIndex,
@@ -97,11 +109,11 @@ function checkIfAllPlayersAnswered(pin) {
     (player) => player.hasAlreadyAnswered,
   );
 
-  let isLastQuestion = room.currentQuestionIndex === questions.length - 1;
+  let isLastQuestion = room.currentQuestionIndex === room.questions.length - 1;
 
   if (playersAlreadyAnswered.length === activePlayers.length) {
     console.log("Ja todos resopodenream", playersAlreadyAnswered);
-    const feedbackQuestion = questions[room.currentQuestionIndex];
+    const feedbackQuestion = room.questions[room.currentQuestionIndex];
 
     io.to(pin).emit(
       "show_feedback",
@@ -109,7 +121,7 @@ function checkIfAllPlayersAnswered(pin) {
       isLastQuestion,
       {
         questionIndex: room.currentQuestionIndex,
-        totalQuestions: questions.length,
+        totalQuestions: room.questions.length,
         question: feedbackQuestion.question,
         answers: feedbackQuestion.answers,
         correctAnswerIndex: feedbackQuestion.correctIndex,
@@ -229,12 +241,14 @@ io.on("connection", (socket) => {
     io.to(data.pin).emit("update_players", playersInTheRoom);
   });
 
-  socket.on("start_game", (data) => {
+  socket.on("start_game", async (data) => {
     console.log("Started gmae", data);
 
     if (!rooms[data.pin]) {
       return socket.emit("error", "Room doesn't exist");
     }
+
+    let room = rooms[data.pin];
 
     if (socket.id !== rooms[data.pin].hostId) {
       return socket.emit("error", "Id from host is not the same for this room");
@@ -244,10 +258,28 @@ io.on("connection", (socket) => {
       return socket.emit("error", "No players enough to start");
     }
 
-    rooms[data.pin].state = "IN_GAME";
-    rooms[data.pin].currentQuestionIndex = 0;
+    try {
+      console.log(`[Sala ${data.pin}] A carregar perguntas do Firebase...`);
 
-    sendQuestion(data.pin);
+      const doc = await db.collection("quizzes").doc("quiz_original").get();
+
+      if (!doc.exists) {
+        console.log("Quiz not found in Firebase!");
+        return;
+      }
+      const allQuestions = doc.data().questions;
+
+      const shuffledQuestions = allQuestions.sort(() => 0.5 - Math.random());
+
+      room.questions = shuffledQuestions.slice(0, 10);
+      room.state = "IN_GAME";
+      room.currentQuestionIndex = 0;
+
+      io.to(data.pin).emit("game_started");
+      sendQuestion(data.pin);
+    } catch (error) {
+      console.error("Error fetching the questions:", error);
+    }
   });
 
   socket.on("submit_answer", (data) => {
@@ -276,7 +308,7 @@ io.on("connection", (socket) => {
       return;
     }
 
-    const currentQ = questions[room.currentQuestionIndex];
+    const currentQ = room.questions[room.currentQuestionIndex];
 
     myPlayer.lastAnswerIndex = data.answerIndex;
 
@@ -407,7 +439,9 @@ io.on("connection", (socket) => {
     io.to(pin).emit("update_players", getCleanPlayersList(room.players));
 
     const currentQuestion =
-      room.state === "IN_GAME" ? questions[room.currentQuestionIndex] : null;
+      room.state === "IN_GAME"
+        ? room.questions[room.currentQuestionIndex]
+        : null;
     const elapsedSeconds = room.questionStartTime
       ? Math.floor((Date.now() - room.questionStartTime) / 1000)
       : QUESTION_DURATION_SECONDS;
@@ -423,7 +457,7 @@ io.on("connection", (socket) => {
       currentQuestion: currentQuestion
         ? {
             questionIndex: room.currentQuestionIndex,
-            totalQuestions: questions.length,
+            totalQuestions: room.questions.length,
             question: currentQuestion.question,
             answers: currentQuestion.answers,
             correctAnswerIndex: currentQuestion.correctIndex,
