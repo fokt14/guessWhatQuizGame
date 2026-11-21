@@ -6,7 +6,7 @@ Players can create private rooms using a PIN code and compete against friends in
 
 ## Live Demo
 
-- Frontend: [Insert your Vercel link here]
+- Frontend: https://guess-what-quiz-game.vercel.app
 - Backend: Hosted on Render
 
 ## Tech Stack
