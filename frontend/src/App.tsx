@@ -267,7 +267,7 @@ function App() {
 
   if (stateOfPlayer === 'ROUND_RESULTS') {
 
-    return <LeaderBoardScreen playersList={players} myRole={myRole} onNextQuestion={handleNextQuestion} isLastQuestion={isLastQuestion} onRestartGame={handleRestartGame} onEndGame={handleEndGame} />
+    return <LeaderBoardScreen myPlayer={myPlayer} playersList={players} myRole={myRole} onNextQuestion={handleNextQuestion} isLastQuestion={isLastQuestion} onRestartGame={handleRestartGame} onEndGame={handleEndGame} />
   }
 
   if (stateOfPlayer === 'LOBBY_PLAYER') {
