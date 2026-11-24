@@ -250,6 +250,7 @@ function App() {
       socket.off("show_feedback");
       socket.off("reconnect_failed_kicked_or_closed");
       socket.off("error");
+
     };
 
   }, []);
