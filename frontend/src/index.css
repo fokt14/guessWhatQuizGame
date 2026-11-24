@@ -25,24 +25,22 @@ body {
 }
 
 .scroll-box-player {
-  max-height: 40vh;
+  max-height: 40dvh;
   overflow-y: auto;
+
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.7) transparent;
 }
 
-.scroll-box-playe::-webkit-scrollbar {
+.scroll-box-player::-webkit-scrollbar {
   width: 6px;
 }
 
-.scroll-box-playe::-webkit-scrollbar-track {
+.scroll-box-player::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.scroll-box-playe::-webkit-scrollbar-thumb {
-  background-color: rgba(
-    148,
-    163,
-    184,
-    0.7
-  ); 
+.scroll-box-player::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.7);
   border-radius: 20px;
 }
