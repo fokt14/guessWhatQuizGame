@@ -26,9 +26,9 @@ export default function GameScreen({ currentQuestion, onAnswerSubmitted }: GameS
             setTimeLeft(prevTime => {
                 if (prevTime <= 1) {
                     clearInterval(timerId);
-                    if (!hasAnswered) {
-                        onAnswerSubmitted(-1);
-                    }
+                    // if (!hasAnswered) {
+                    //     onAnswerSubmitted(-1);
+                    // }
                     return 0;
                 }
                 return prevTime - 1;
@@ -37,6 +37,13 @@ export default function GameScreen({ currentQuestion, onAnswerSubmitted }: GameS
 
         return () => clearInterval(timerId);
     }, [currentQuestion]);
+
+    useEffect(() => {
+        if (timeLeft === 0 && !hasAnswered) {
+            setHasAnswered(true);
+            onAnswerSubmitted(-1);
+        }
+    }, [timeLeft, hasAnswered, onAnswerSubmitted]);
 
     const buttonColors = [
         "border-red-700 bg-red-500 hover:bg-red-400 focus:ring-red-400",
