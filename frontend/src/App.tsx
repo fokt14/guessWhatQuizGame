@@ -28,6 +28,7 @@ function App() {
   const [isLastQuestion, setIsLastQuestion] = useState(false);
   const [myRole, setMyRole] = useState<"HOST" | "PLAYER" | null>(null);
   const [myPlayer, setMyPlayer] = useState<Player | null>(null);
+  const [hasAnsweredCurrentQuestion, setHasAnsweredCurrentQuestion] = useState(false);
 
 
   const handleReturnToMenu = (myRole: any) => {
@@ -91,6 +92,7 @@ function App() {
 
   const handleAnswerSubmitted = (selectedAnswerIndex: number) => {
     // console.log("Answer submitted:", selectedAnswerIndex);
+    setHasAnsweredCurrentQuestion(true);
     socket.emit('submit_answer', { pin: pin, answerIndex: selectedAnswerIndex });
   }
 
@@ -110,18 +112,29 @@ function App() {
   useEffect(() => {
     socket.on('reconnected_success', (data: {
       myPlayer: Player;
-      roomState: GameState;
+      pin: string;
+      roomState: 'LOBBY_HOST' | 'WAITING_FOR_ANSWERS' | 'SHOWING_RESULTS' | 'ROUND_RESULTS' | 'GAME_OVER';
       currentQuestion: Question | null;
+      isLastQuestion: boolean;
     }) => {
       setMyPlayer(data.myPlayer);
       setMyRole(data.myPlayer.role);
       setCurrentQuestion(data.currentQuestion);
+      setPin(data.pin);
+      setHasAnsweredCurrentQuestion(data.myPlayer.hasAlreadyAnswered);
+      setIsLastQuestion(data.isLastQuestion);
 
-      if (data.roomState === 'LOBBY_HOST' || data.roomState === 'LOBBY_PLAYER') {
+      if (data.roomState === 'LOBBY_HOST') {
         setStateOfPlayer(data.myPlayer.role === 'HOST' ? 'LOBBY_HOST' : 'LOBBY_PLAYER');
       }
-      if (data.roomState === 'IN_GAME') {
+      if (data.roomState === 'WAITING_FOR_ANSWERS') {
         setStateOfPlayer('IN_GAME');
+      }
+      if (data.roomState === 'SHOWING_RESULTS') {
+        setStateOfPlayer('FEEDBACK');
+      }
+      if (data.roomState === 'ROUND_RESULTS' || data.roomState === 'GAME_OVER') {
+        setStateOfPlayer('ROUND_RESULTS');
       }
     });
 
@@ -156,6 +169,7 @@ function App() {
       // console.log("QUESTAO:", question);
       setStateOfPlayer('IN_GAME');
       setCurrentQuestion(question);
+      setHasAnsweredCurrentQuestion(false);
     });
 
     socket.on("show_feedback", (players: Player[], isLastQuestion: boolean, question: Question) => {
@@ -213,17 +227,6 @@ function App() {
       setErrorMessage(message);
     });
 
-    const storedPin = sessionStorage.getItem('lastRoomPin');
-    const storedToken = sessionStorage.getItem('playerToken');
-
-    if (storedPin && storedToken) {
-      socket.emit('reconnect_attempt', {
-        pin: storedPin,
-        nickname: sessionStorage.getItem('nickname'),
-        token: storedToken,
-      });
-    }
-
     socket.on("reconnect_failed_kicked_or_closed", (message: string) => {
       // console.log(message);
       setErrorMessage(message);
@@ -238,7 +241,34 @@ function App() {
       sessionStorage.removeItem('playerToken');
     });
 
+    const attemptReconnect = () => {
+      const storedPin = sessionStorage.getItem('lastRoomPin');
+      const storedToken = sessionStorage.getItem('playerToken');
+
+      if (storedPin && storedToken) {
+        socket.emit('reconnect_attempt', {
+          pin: storedPin,
+          nickname: sessionStorage.getItem('nickname'),
+          token: storedToken,
+        });
+      }
+    };
+
+    socket.on('connect', attemptReconnect);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && socket.connected) {
+        attemptReconnect();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    if (socket.connected) {
+      attemptReconnect();
+    }
+
     return () => {
+      socket.off('connect', attemptReconnect);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       socket.off('reconnected_success');
       socket.off('room_created');
       socket.off('joined_room');
@@ -262,7 +292,7 @@ function App() {
   }
 
   if (stateOfPlayer === 'IN_GAME' && currentQuestion) {
-    return <GameScreen currentQuestion={currentQuestion} onAnswerSubmitted={handleAnswerSubmitted} />;
+    return <GameScreen currentQuestion={currentQuestion} onAnswerSubmitted={handleAnswerSubmitted} hasAlreadyAnswered={hasAnsweredCurrentQuestion} />;
   }
 
   if (stateOfPlayer === 'ROUND_RESULTS') {

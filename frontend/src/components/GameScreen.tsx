@@ -4,23 +4,21 @@ import { useState, useEffect } from "react";
 interface GameScreenProps {
     currentQuestion: Question;
     onAnswerSubmitted: (selectedAnswerIndex: number) => void;
+    hasAlreadyAnswered: boolean;
 }
 
-export default function GameScreen({ currentQuestion, onAnswerSubmitted }: GameScreenProps) {
+export default function GameScreen({ currentQuestion, onAnswerSubmitted, hasAlreadyAnswered }: GameScreenProps) {
     const [timeLeft, setTimeLeft] = useState(currentQuestion.timeRemainingSeconds ?? 25);
-    const [hasAnswered, setHasAnswered] = useState(false);
 
-    const maxTime = currentQuestion.timeRemainingSeconds ?? 25;
+    const maxTime = 25;
 
     const handleAnswer = (index: number): void => {
-        if (hasAnswered) return;
-        setHasAnswered(true);
+        if (hasAlreadyAnswered) return;
         onAnswerSubmitted(index);
     }
 
     useEffect(() => {
         setTimeLeft(currentQuestion.timeRemainingSeconds ?? 25);
-        setHasAnswered(false);
 
         let timerId = setInterval(() => {
             setTimeLeft(prevTime => {
@@ -39,11 +37,10 @@ export default function GameScreen({ currentQuestion, onAnswerSubmitted }: GameS
     }, [currentQuestion]);
 
     useEffect(() => {
-        if (timeLeft === 0 && !hasAnswered) {
-            setHasAnswered(true);
+        if (timeLeft === 0 && !hasAlreadyAnswered) {
             onAnswerSubmitted(-1);
         }
-    }, [timeLeft, hasAnswered, onAnswerSubmitted]);
+    }, [timeLeft, hasAlreadyAnswered, onAnswerSubmitted]);
 
     const buttonColors = [
         "border-red-700 bg-red-500 hover:bg-red-400 focus:ring-red-400",
@@ -88,8 +85,8 @@ export default function GameScreen({ currentQuestion, onAnswerSubmitted }: GameS
                             <button
                                 key={index}
                                 onClick={() => handleAnswer(index)}
-                                disabled={hasAnswered}
-                                className={`w-full rounded-2xl border-b-8 p-6 text-xl md:text-2xl font-black text-white shadow-lg transition-all duration-250 break-words ${hasAnswered ? 'opacity-50 cursor-not-allowed scale-95 border-b-0 translate-y-2' : `${colorClass} active:scale-95 active:translate-y-2 active:border-b-0`}`}
+                                disabled={hasAlreadyAnswered}
+                                className={`w-full rounded-2xl border-b-8 p-6 text-xl md:text-2xl font-black text-white shadow-lg transition-all duration-250 break-words ${hasAlreadyAnswered ? 'opacity-50 cursor-not-allowed scale-95 border-b-0 translate-y-2' : `${colorClass} active:scale-95 active:translate-y-2 active:border-b-0`}`}
                             >
                                 {answer}
                             </button>
