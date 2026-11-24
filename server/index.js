@@ -41,7 +41,7 @@ app.use(
 const server = http.createServer(app);
 
 const rooms = {};
-const QUESTION_DURATION_SECONDS = 15;
+const QUESTION_DURATION_SECONDS = 25;
 
 const io = new Server(server, {
   cors: {
@@ -101,6 +101,7 @@ function sendQuestion(pin) {
     answers: currentQ.answers,
     correctAnswerIndex: currentQ.correctIndex,
     timeRemainingSeconds: QUESTION_DURATION_SECONDS,
+    imageUrl: currentQ.imageUrl || null,
   };
 
   io.to(pin).emit("new_question", questionToSend);
@@ -337,8 +338,8 @@ io.on("connection", (socket) => {
     if (currentQ.correctIndex == data.answerIndex) {
       console.log("CARLADHWA");
 
-      let timeRemaining = Math.max(0, 15000 - timeTaken);
-      let percentageOfTimeTaken = timeRemaining / 15000;
+      let timeRemaining = Math.max(0, 25000 - timeTaken);
+      let percentageOfTimeTaken = timeRemaining / 25000;
       let pointsWon = Math.round(percentageOfTimeTaken * 100);
 
       myPlayer.points += pointsWon;
