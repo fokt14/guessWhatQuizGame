@@ -53,7 +53,7 @@ export default function GameScreen({ currentQuestion, onAnswerSubmitted }: GameS
     ];
 
     return (
-        <div className="flex min-h-dvh w-full items-center justify-center bg-[url('/caminho-da-tua-onda.jpg')] bg-cover bg-center bg-fixed px-4 py-6 font-sans">
+        <div className="flex min-h-dvh w-full items-center justify-center bg-cover bg-center bg-fixed px-4 py-6 font-sans">
 
             <div className="flex w-full max-w-sm flex-col gap-6 rounded-3xl border border-blue-400/50 bg-slate-900/70 p-6 shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] backdrop-blur-xl md:max-w-4xl md:p-14">
 

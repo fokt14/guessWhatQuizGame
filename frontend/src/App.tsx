@@ -272,7 +272,7 @@ function App() {
 
   if (stateOfPlayer === 'LOBBY_PLAYER') {
     return (
-      <div className="flex min-h-dvh w-full items-center justify-center bg-[url('/caminho-da-tua-onda.jpg')] bg-cover bg-center bg-fixed px-4 py-6 font-sans">
+      <div className="flex min-h-dvh w-full items-center justify-center  bg-cover bg-center bg-fixed px-4 py-6 font-sans">
 
         <div className="flex min-h-80 w-full max-w-sm md:max-w-xl lg:max-w-3xl flex-col items-center justify-center gap-6 rounded-3xl border border-blue-400/30 bg-blue-500/20 backdrop-blur-md p-6 md:p-10 lg:p-14 shadow-2xl transition-all duration-300 text-center">
 
@@ -320,7 +320,7 @@ function App() {
   // RETURNING UI FOR MENU AND LOBBY HOST STATES
   return (
     <>
-      <div className="flex min-h-dvh w-full items-center justify-center bg-[url('/caminho-da-tua-onda.jpg')] bg-cover bg-center bg-fixed px-4 py-6 font-sans">
+      <div className="flex min-h-dvh w-full items-center justify-center bg-cover bg-center bg-fixed px-4 py-6 font-sans">
 
         <div className="flex min-h-80 w-full max-w-sm md:max-w-xl lg:max-w-3xl flex-col items-center justify-center gap-6 rounded-3xl border border-black bg-blue-500/20 backdrop-blur-md p-6 md:p-10 lg:p-14 shadow-2xl transition-all duration-300">
           <div className="flex w-full">
@@ -362,7 +362,7 @@ function App() {
                 Players in the room ({players.length}) / {MAX_PLAYERS_IN_ROOM}
               </h3>
 
-              <div className="w-full max-h-[40vh] overflow-y-auto  p-4 ">
+              <div className="w-full p-4 scroll-box-player">
                 <ul className="flex flex-wrap justify-center gap-2 md:gap-3">
                   {players.map((player) => (
 

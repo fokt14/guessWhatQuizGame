@@ -23,3 +23,26 @@ body {
   display: flex;
   flex-direction: column;
 }
+
+.scroll-box-player {
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.scroll-box-playe::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scroll-box-playe::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll-box-playe::-webkit-scrollbar-thumb {
+  background-color: rgba(
+    148,
+    163,
+    184,
+    0.7
+  ); 
+  border-radius: 20px;
+}
