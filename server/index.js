@@ -48,6 +48,8 @@ const io = new Server(server, {
     origin: [
       "https://guess-what-quiz-game.vercel.app",
       "http://localhost:5173",
+      "http://172.31.162.142:5173",
+      process.env.FRONTEND_URL,
     ],
     methods: ["GET", "POST"],
     credentials: true,
@@ -178,6 +180,7 @@ function finishQuestion(pin) {
 
   clearTimeout(room.roundTimer);
   room.roundTimer = setTimeout(() => {
+    room.state = "ROUND_RESULTS";
     io.to(pin).emit(
       "round_finished",
       getCleanPlayersList(room.players),
@@ -483,10 +486,7 @@ io.on("connection", (socket) => {
 
     io.to(pin).emit("update_players", getCleanPlayersList(room.players));
 
-    const currentQuestion =
-      room.state === "IN_GAME"
-        ? room.questions[room.currentQuestionIndex]
-        : null;
+    const currentQuestion = room.questions?.[room.currentQuestionIndex] ?? null;
     const elapsedSeconds = room.questionStartTime
       ? Math.floor((Date.now() - room.questionStartTime) / 1000)
       : QUESTION_DURATION_SECONDS;
@@ -497,18 +497,26 @@ io.on("connection", (socket) => {
     );
 
     socket.emit("reconnected_success", {
+      pin,
       myPlayer: getCleanPlayersList([playerToReconnect])[0],
       roomState: room.state,
       currentQuestion: currentQuestion
         ? {
+            currentQuestionIndex: room.currentQuestionIndex,
             questionIndex: room.currentQuestionIndex,
             totalQuestions: room.questions.length,
             question: currentQuestion.question,
             answers: currentQuestion.answers,
             correctAnswerIndex: currentQuestion.correctIndex,
-            timeRemainingSeconds,
+            timeRemainingSeconds:
+              room.state === "WAITING_FOR_ANSWERS"
+                ? timeRemainingSeconds
+                : QUESTION_DURATION_SECONDS,
+            imageUrl: currentQuestion.imageUrl || undefined,
           }
         : null,
+      isLastQuestion:
+        room.currentQuestionIndex === (room.questions?.length ?? 0) - 1,
     });
 
     console.log(
@@ -573,15 +581,11 @@ io.on("connection", (socket) => {
       return;
     }
 
-    if (room.state === "LOBBY_HOST") {
-      room.players = room.players.filter((p) => p.id !== socket.id);
-    } else {
-      leavingPlayer.isOnline = false; // Mark the player as offline instead of removing them
+    leavingPlayer.isOnline = false;
 
-      console.log(
-        `Jogador saiu da sala ${pin}. Restam ${room.players.length} jogadores.`,
-      );
-    }
+    console.log(
+      `Jogador saiu da sala ${pin}. Restam ${room.players.length} jogadores.`,
+    );
 
     io.to(pin).emit("update_players", getCleanPlayersList(room.players));
     checkIfAllPlayersAnswered(pin);
