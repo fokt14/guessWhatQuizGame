@@ -89,10 +89,12 @@ function sendQuestion(pin) {
 
   if (!currentQ) {
     room.state = "GAME_OVER";
-    return io.to(pin).emit("game_over", { message: "Jogo terminado!" });
+    return io.to(pin).emit("game_over", { message: "Game ended!" });
   }
 
   room.questionStartTime = Date.now();
+
+  room.state = "WAITING_FOR_ANSWERS";
 
   const questionToSend = {
     questionIndex: room.currentQuestionIndex,
@@ -105,6 +107,17 @@ function sendQuestion(pin) {
   };
 
   io.to(pin).emit("new_question", questionToSend);
+
+  clearTimeout(room.questionTimeout);
+
+  const timeTotalMs = QUESTION_DURATION_SECONDS * 1000 + 1000;
+
+  room.questionTimeout = setTimeout(() => {
+    if (rooms[pin] && rooms[pin].state === "WAITING_FOR_ANSWERS") {
+      console.log(`Tempo esgotado na sala ${pin}. A forçar fim de pergunta!`);
+      finishQuestion(pin);
+    }
+  }, timeTotalMs);
 }
 
 function nextQuestion(pin) {
@@ -132,37 +145,46 @@ function checkIfAllPlayersAnswered(pin) {
     (player) => player.hasAlreadyAnswered,
   );
 
-  let isLastQuestion = room.currentQuestionIndex === room.questions.length - 1;
-
   if (playersAlreadyAnswered.length === activePlayers.length) {
     console.log("Ja todos resopodenream", playersAlreadyAnswered);
-    const feedbackQuestion = room.questions[room.currentQuestionIndex];
+    finishQuestion(pin);
+  }
+}
 
+function finishQuestion(pin) {
+  const room = rooms[pin];
+  if (!room || room.state !== "WAITING_FOR_ANSWERS") return;
+
+  room.state = "SHOWING_RESULTS";
+
+  clearTimeout(room.questionTimeout);
+
+  let isLastQuestion = room.currentQuestionIndex === room.questions.length - 1;
+  const feedbackQuestion = room.questions[room.currentQuestionIndex];
+
+  io.to(pin).emit(
+    "show_feedback",
+    getCleanPlayersList(room.players),
+    isLastQuestion,
+    {
+      questionIndex: room.currentQuestionIndex,
+      totalQuestions: room.questions.length,
+      question: feedbackQuestion.question,
+      answers: feedbackQuestion.answers,
+      correctAnswerIndex: feedbackQuestion.correctIndex,
+      timeRemainingSeconds: QUESTION_DURATION_SECONDS,
+    },
+  ); //show_feedback -- round_finished
+
+  clearTimeout(room.roundTimer);
+  room.roundTimer = setTimeout(() => {
     io.to(pin).emit(
-      "show_feedback",
+      "round_finished",
       getCleanPlayersList(room.players),
       isLastQuestion,
-      {
-        questionIndex: room.currentQuestionIndex,
-        totalQuestions: room.questions.length,
-        question: feedbackQuestion.question,
-        answers: feedbackQuestion.answers,
-        correctAnswerIndex: feedbackQuestion.correctIndex,
-        timeRemainingSeconds: QUESTION_DURATION_SECONDS,
-      },
-    ); //show_feedback -- round_finished
-
-    clearTimeout(room.roundTimer); // Clear any existing timer before setting a new one
-    room.roundTimer = setTimeout(() => {
-      io.to(pin).emit(
-        "round_finished",
-        getCleanPlayersList(room.players),
-        isLastQuestion,
-      );
-
-      room.roundTimer = null;
-    }, 5000);
-  }
+    );
+    room.roundTimer = null;
+  }, 5000);
 }
 
 //SOCKET.IO
@@ -195,7 +217,7 @@ io.on("connection", (socket) => {
           points: 0,
         },
       ],
-      maxPlayers: 10,
+      maxPlayers: 100,
       roundTimer: null,
       state: "LOBBY_HOST",
     };
