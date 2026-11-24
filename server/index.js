@@ -41,7 +41,7 @@ app.use(
 const server = http.createServer(app);
 
 const rooms = {};
-const QUESTION_DURATION_SECONDS = 15;
+const QUESTION_DURATION_SECONDS = 25;
 
 const io = new Server(server, {
   cors: {

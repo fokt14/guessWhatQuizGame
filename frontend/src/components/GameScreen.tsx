@@ -7,10 +7,10 @@ interface GameScreenProps {
 }
 
 export default function GameScreen({ currentQuestion, onAnswerSubmitted }: GameScreenProps) {
-    const [timeLeft, setTimeLeft] = useState(currentQuestion.timeRemainingSeconds ?? 15);
+    const [timeLeft, setTimeLeft] = useState(currentQuestion.timeRemainingSeconds ?? 25);
     const [hasAnswered, setHasAnswered] = useState(false);
 
-    const maxTime = currentQuestion.timeRemainingSeconds ?? 15;
+    const maxTime = currentQuestion.timeRemainingSeconds ?? 25;
 
     const handleAnswer = (index: number): void => {
         if (hasAnswered) return;
@@ -19,7 +19,7 @@ export default function GameScreen({ currentQuestion, onAnswerSubmitted }: GameS
     }
 
     useEffect(() => {
-        setTimeLeft(currentQuestion.timeRemainingSeconds ?? 15);
+        setTimeLeft(currentQuestion.timeRemainingSeconds ?? 25);
         setHasAnswered(false);
 
         let timerId = setInterval(() => {
@@ -75,7 +75,7 @@ export default function GameScreen({ currentQuestion, onAnswerSubmitted }: GameS
                                 key={index}
                                 onClick={() => handleAnswer(index)}
                                 disabled={hasAnswered}
-                                className={`w-full rounded-2xl border-b-8 p-6 text-xl md:text-2xl font-black text-white shadow-lg transition-all duration-150 break-words ${hasAnswered ? 'opacity-50 cursor-not-allowed scale-95 border-b-0 translate-y-2' : `${colorClass} active:scale-95 active:translate-y-2 active:border-b-0`}`}
+                                className={`w-full rounded-2xl border-b-8 p-6 text-xl md:text-2xl font-black text-white shadow-lg transition-all duration-250 break-words ${hasAnswered ? 'opacity-50 cursor-not-allowed scale-95 border-b-0 translate-y-2' : `${colorClass} active:scale-95 active:translate-y-2 active:border-b-0`}`}
                             >
                                 {answer}
                             </button>
