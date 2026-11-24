@@ -1,6 +1,7 @@
 import type { Player } from "../interfaces/interfaces";
 
 interface LeaderBoardScreenProps {
+    myPlayer: Player | null;
     playersList: Player[];
     myRole: "HOST" | "PLAYER" | null;
     onNextQuestion: () => void;
@@ -9,7 +10,7 @@ interface LeaderBoardScreenProps {
     onEndGame: () => void;
 }
 
-export default function LeaderBoardScreen({ playersList, myRole, onNextQuestion, isLastQuestion, onRestartGame, onEndGame }: LeaderBoardScreenProps) {
+export default function LeaderBoardScreen({ myPlayer, playersList, myRole, onNextQuestion, isLastQuestion, onRestartGame, onEndGame }: LeaderBoardScreenProps) {
 
     const sortedPlayers = [...playersList].sort((a, b) => b.points - a.points);
 
@@ -18,11 +19,19 @@ export default function LeaderBoardScreen({ playersList, myRole, onNextQuestion,
     }
 
     return (
-        <div className="flex min-h-dvh w-full flex-col items-center justify-center bg-[url('/caminho-da-tua-onda.jpg')] bg-cover bg-center bg-fixed px-4 py-6 font-sans">
+        <div className="flex min-h-dvh w-full flex-col items-center justify-center bg-cover bg-center bg-fixed px-4 py-6 font-sans">
 
             <h1 className="mb-6 text-4xl font-black uppercase tracking-widest text-black drop-shadow-xl sm:mb-10 md:text-6xl animate-in slide-in-from-top-10 duration-500">
                 Leaderboard
             </h1>
+
+            <h4>
+                {myPlayer && (
+                    <div className="mb-6 text-lg font-bold text-black drop-shadow-md sm:text-xl md:text-2xl">
+                        You are in <span className="text-blue-600"> {sortedPlayers.findIndex(player => player.id === myPlayer.id) + 1}º</span> place with <span className="text-blue-600">{myPlayer.points} pts</span>
+                    </div>
+                )}
+            </h4>
 
             <div className="flex w-full max-w-2xl flex-col gap-3 rounded-3xl border border-blue-400/30 bg-blue-900/40 backdrop-blur-xl p-4 shadow-2xl sm:p-6 max-h-[55vh] md:max-h-[65vh] overflow-y-auto">
 

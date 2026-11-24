@@ -30,7 +30,7 @@ export default function JoinRoomModal({ isOpen, onClose, onJoin, nickname }: Joi
         >
             <div
                 onClick={(e) => e.stopPropagation()}
-                className="flex w-full max-w-sm flex-col gap-6 rounded-3xl border border-blue-400/50 bg-slate-600/70 backdrop-blur-xl p-6 shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] animate-in fade-in zoom-in-95 duration-200 md:max-w-md md:p-8"
+                className="flex w-full max-w-sm flex-col gap-6 rounded-3xl border border-blue-400/50 bg-blue-400/70 backdrop-blur-xl p-6 shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] animate-in fade-in zoom-in-95 duration-200 md:max-w-md md:p-8"
             >
                 <div className="flex items-center justify-between border-b border-white/20 pb-4 text-white">
                     <h3 className="text-2xl font-black tracking-wide">Join Room</h3>

@@ -267,14 +267,13 @@ function App() {
 
   if (stateOfPlayer === 'ROUND_RESULTS') {
 
-    return <LeaderBoardScreen playersList={players} myRole={myRole} onNextQuestion={handleNextQuestion} isLastQuestion={isLastQuestion} onRestartGame={handleRestartGame} onEndGame={handleEndGame} />
+    return <LeaderBoardScreen myPlayer={myPlayer} playersList={players} myRole={myRole} onNextQuestion={handleNextQuestion} isLastQuestion={isLastQuestion} onRestartGame={handleRestartGame} onEndGame={handleEndGame} />
   }
 
   if (stateOfPlayer === 'LOBBY_PLAYER') {
     return (
       <div className="flex min-h-dvh w-full items-center justify-center bg-[url('/caminho-da-tua-onda.jpg')] bg-cover bg-center bg-fixed px-4 py-6 font-sans">
 
-        {/* Cartão de Vidro Azul */}
         <div className="flex min-h-80 w-full max-w-sm md:max-w-xl lg:max-w-3xl flex-col items-center justify-center gap-6 rounded-3xl border border-blue-400/30 bg-blue-500/20 backdrop-blur-md p-6 md:p-10 lg:p-14 shadow-2xl transition-all duration-300 text-center">
 
           <h1 className="text-4xl font-black  text-black md:text-5xl drop-shadow-md">You are in!</h1>
@@ -359,29 +358,38 @@ function App() {
               <h2 className="text-xl font-bold text-black/80">Room PIN:</h2>
               <h1 className="text-5xl font-black tracking-widest md:text-7xl">{pin}</h1>
 
-              <h3 className="mt-6 text-lg font-bold md:text-xl">
+              <h3 className="mt-4 text-lg font-bold md:text-xl">
                 Players in the room ({players.length}) / {MAX_PLAYERS_IN_ROOM}
               </h3>
 
-              <ul className="flex max-w-full flex-wrap justify-center gap-3">
-                {players.map((player) => (
-                  <div className="flex max-w-full items-center justify-center rounded-full bg-white/90 px-4 py-2 text-base font-bold text-gray-900 shadow-sm md:px-5 md:py-3 md:text-lg" key={player.id}>
-                    <li key={player.id} className="min-w-0 break-all">{player.nickname}</li>
-                    {player.id !== socket.id && (
-                      <button
-                        type="button"
-                        className="ml-3 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full hover:scale-110 hover:bg-red-100 transition-all"
-                        aria-label={`Remove ${player.nickname}`}
-                        onClick={() => handleRemovePlayer(player.id)}
-                      >
-                        <img src={deleteFriendIcon} alt="Kick" className="h-5 w-5 opacity-70" />
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </ul>
+              <div className="w-full max-h-[40vh] overflow-y-auto  p-4 ">
+                <ul className="flex flex-wrap justify-center gap-2 md:gap-3">
+                  {players.map((player) => (
 
-              <div className="mt-8 flex w-full flex-col gap-4 sm:flex-row sm:justify-center">
+                    <li
+                      key={player.id}
+                      className="flex items-center justify-center rounded-full bg-white/90 px-3 py-1.5 text-sm md:text-base font-bold text-gray-900 shadow-sm md:px-4 md:py-2"
+                    >
+                      <span className="truncate max-w-[120px] md:max-w-[200px]">
+                        {player.nickname}
+                      </span>
+
+                      {player.id !== socket.id && (
+                        <button
+                          type="button"
+                          className="ml-2 flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-full transition-all hover:scale-110 hover:bg-red-100"
+                          aria-label={`Remove ${player.nickname}`}
+                          onClick={() => handleRemovePlayer(player.id)}
+                        >
+                          <img src={deleteFriendIcon} alt="Kick" className="h-4 w-4 opacity-70" />
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="mt-6 flex w-full flex-col gap-4 sm:flex-row sm:justify-center">
                 <button
                   onClick={() => handleReturnToMenu(myRole)}
                   className="w-full rounded-2xl border-b-4 border-slate-700 bg-slate-500 p-4 text-xl font-bold text-white shadow-lg transition-all duration-150 hover:bg-slate-400 active:translate-y-1 active:scale-95 sm:w-auto md:p-5"
