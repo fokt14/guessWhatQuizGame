@@ -392,7 +392,7 @@ function App() {
                 Players in the room ({players.length}) / {MAX_PLAYERS_IN_ROOM}
               </h3>
 
-              <div className="w-full p-4 scroll-box-player">
+              <div className="w-full min-h-0 touch-pan-y overscroll-y-contain rounded-2xl p-4 md:p-6 scroll-box-player">
                 <ul className="flex flex-wrap justify-center gap-2 md:gap-3">
                   {players.map((player) => (
 
@@ -400,7 +400,7 @@ function App() {
                       key={player.id}
                       className="flex items-center justify-center rounded-full bg-white/90 px-3 py-1.5 text-sm md:text-base font-bold text-gray-900 shadow-sm md:px-4 md:py-2"
                     >
-                      <span className="truncate max-w-[120px] md:max-w-[200px]">
+                      <span className="max-w-30 truncate md:max-w-50">
                         {player.nickname}
                       </span>
 
