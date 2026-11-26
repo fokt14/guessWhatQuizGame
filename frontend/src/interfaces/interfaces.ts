@@ -11,7 +11,8 @@ export interface Question {
   question: string;
   answers: string[];
   correctAnswerIndex: number;
-  currentQuestionIndex: number;
+  questionIndex: number;
+  totalQuestions: number;
   timeRemainingSeconds?: number;
   imageUrl?: string;
 }
