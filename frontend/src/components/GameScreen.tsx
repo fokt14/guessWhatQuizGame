@@ -46,7 +46,7 @@ export default function GameScreen({ currentQuestion, onAnswerSubmitted, hasAlre
         "border-red-700 bg-red-500 hover:bg-red-400 focus:ring-red-400",
         "border-blue-700 bg-blue-500 hover:bg-blue-400 focus:ring-blue-400",
         "border-amber-700 bg-amber-500 hover:bg-amber-400 focus:ring-amber-400",
-        "border-emerald-700 bg-emerald-500 hover:bg-emerald-400 focus:ring-emerald-400"
+        "border-emerald-700 bg-emerald-900 hover:bg-emerald-600 focus:ring-emerald-400"
     ];
 
     return (
@@ -62,6 +62,9 @@ export default function GameScreen({ currentQuestion, onAnswerSubmitted, hasAlre
                 </div>
 
                 <div className="flex flex-col items-center justify-center gap-4 text-center text-white">
+                    <p className="rounded-full border border-white/20 bg-white/10 px-4 py-1 text-sm font-bold uppercase tracking-widest text-white/80">
+                        Question {currentQuestion.questionIndex + 1} of {currentQuestion.totalQuestions}
+                    </p>
                     <div className={`flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full text-2xl font-black shadow-lg transition-colors duration-300 ${timeLeft <= 5 ? 'bg-red-600 text-white animate-pulse' : 'bg-white/20 backdrop-blur-sm text-white border border-white/30'}`}>
                         {timeLeft}
                     </div>

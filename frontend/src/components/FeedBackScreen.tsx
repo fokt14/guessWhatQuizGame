@@ -22,9 +22,31 @@ export default function FeedBackScreen({ myPlayer, question }: FeedBackScreenPro
         return () => clearTimeout(timer);
     }, []);
 
+    if (myPlayer?.role === 'HOST') {
+        return (
+            <div className={`flex min-h-dvh w-full flex-col items-center justify-center px-4 py-6 text-center transition-colors duration-500 bg-blue-400 text-white`}>
+                <h1 className="mb-6 text-4xl font-black uppercase tracking-widest drop-shadow-md sm:mb-8 sm:text-6xl md:text-8xl">
+                    The correct answer is
+                </h1>
+
+                <div className="mb-12 text-center sm:mb-16">
+                    <p className="max-w-2xl rounded-xl bg-black/20 px-4 py-4 text-xl font-bold shadow-inner sm:px-6 sm:text-2xl md:text-5xl">
+                        {question?.answers[question.correctAnswerIndex]}
+                    </p>
+                </div>
+
+                <div className="absolute bottom-0 left-0 w-full h-2 bg-white/20">
+                    <div className="h-full bg-white transition-all ease-linear" style={{ width: barWidth, transitionDuration: '5000ms' }}></div>
+                </div>
+
+            </div>
+        )
+    }
+
+
     return (
         <>
-        
+
             <div className={`flex min-h-dvh w-full flex-col items-center justify-center px-4 py-6 text-center transition-colors duration-500 ${isCorrectAnswer ? 'bg-green-500' : 'bg-red-500'} text-white`}>
                 <h1 className="mb-6 text-4xl font-black uppercase tracking-widest drop-shadow-md sm:mb-8 sm:text-6xl md:text-8xl">
                     {isCorrectAnswer ? 'CORRECT' : 'INCORRECT'}
