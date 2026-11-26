@@ -62,13 +62,13 @@ export default function LeaderBoardScreen({ myPlayer, playersList, myRole, onNex
                 {isLastQuestion ? 'Final Leaderboard' : 'Leaderboard'}
             </h1>
 
-            {/* <h4>
-                {myPlayer && myPlayer.role !== "HOST" && (
+            <h4>
+                {myPlayer && myPlayer.role !== "HOST" && !isLastQuestion && (
                     <div className={`mb-6 text-lg font-bold drop-shadow-md sm:text-xl md:text-2xl text-black'}`}>
                         You are in <span className={isLastQuestion ? 'text-yellow-300' : 'text-blue-600'}> {sortedPlayers.findIndex(player => player.id === myPlayer.id) + 1}º</span> place with <span className={isLastQuestion ? 'text-yellow-300' : 'text-blue-600'}>{myPlayer.points} pts</span>
                     </div>
                 )}
-            </h4> */}
+            </h4>
 
             {isLastQuestion && countdown !== null && (
                 <div className="mb-6 flex flex-col items-center rounded-3xl border border-blue-300/30 bg-slate-900/70 px-10 py-6 text-center text-white shadow-[0_0_40px_-10px_rgba(59,130,246,0.5)] backdrop-blur-xl">
@@ -120,9 +120,15 @@ export default function LeaderBoardScreen({ myPlayer, playersList, myRole, onNex
             {(!isLastQuestion || podiumRevealComplete) && (
                 <>
                     {isLastQuestion && (
-                        <h2 className="mb-4 text-2xl font-black uppercase tracking-widest text-black drop-shadow-md">
-                            All placements
-                        </h2>
+                        <div className={`mb-6 text-lg font-bold drop-shadow-md sm:text-xl md:text-2xl text-black'}`}>
+                            <h2 className="mb-4 text-2xl font-black uppercase tracking-widest text-black drop-shadow-md">
+                                All placements
+                            </h2>
+
+                            <div className={`mb-6 text-lg font-bold drop-shadow-md sm:text-xl md:text-2xl text-black'}`}>
+                                You are in <span className={isLastQuestion ? 'text-yellow-300' : 'text-blue-600'}> {sortedPlayers.findIndex(player => player.id === myPlayer?.id) + 1}º</span> place with <span className={isLastQuestion ? 'text-yellow-300' : 'text-blue-600'}>{myPlayer?.points} pts</span>
+                            </div>
+                        </div>
                     )}
 
                     <div className={`flex w-full max-w-2xl flex-col gap-3 rounded-3xl border p-4 shadow-2xl backdrop-blur-xl sm:p-6 max-h-[55vh] md:max-h-[65vh] overflow-y-auto ${isLastQuestion ? 'border-blue-300/30 bg-slate-900/70' : 'border-blue-400/30 bg-blue-900/40'}`}>
