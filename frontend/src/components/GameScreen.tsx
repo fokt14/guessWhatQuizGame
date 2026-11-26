@@ -8,9 +8,9 @@ interface GameScreenProps {
 }
 
 export default function GameScreen({ currentQuestion, onAnswerSubmitted, hasAlreadyAnswered }: GameScreenProps) {
-    const [timeLeft, setTimeLeft] = useState(currentQuestion.timeRemainingSeconds ?? 25);
+    const [timeLeft, setTimeLeft] = useState(currentQuestion.timeRemainingSeconds ?? 60);
 
-    const maxTime = 25;
+    const maxTime = 60;
 
     const handleAnswer = (index: number): void => {
         if (hasAlreadyAnswered) return;
@@ -18,7 +18,7 @@ export default function GameScreen({ currentQuestion, onAnswerSubmitted, hasAlre
     }
 
     useEffect(() => {
-        setTimeLeft(currentQuestion.timeRemainingSeconds ?? 25);
+        setTimeLeft(currentQuestion.timeRemainingSeconds ?? 60);
 
         let timerId = setInterval(() => {
             setTimeLeft(prevTime => {
