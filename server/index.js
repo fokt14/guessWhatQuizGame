@@ -319,7 +319,7 @@ io.on("connection", (socket) => {
 
       const shuffledQuestions = allQuestions.sort(() => 0.5 - Math.random());
 
-      room.questions = shuffledQuestions.slice(0, 10);
+      room.questions = shuffledQuestions.slice(0, 14);
       room.state = "IN_GAME";
       room.currentQuestionIndex = 0;
 
