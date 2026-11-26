@@ -14,7 +14,7 @@ export default function LandingPageScreen({ setStateOfPlayer }: LandingPageProps
                     GuessWhat
                 </h1>
                 <p className="mt-6 text-xl font-bold text-slate-400 sm:text-3xl drop-shadow-[0_2px_4px_rgba(255,255,255,0.3)]">
-                    The trivia game to ruin friendships.
+                    HAMK TECH EDITION.
                 </p>
             </div>
             <div className="flex w-full max-w-sm flex-col items-center gap-6 rounded-3xl border border-blue-400/20 bg-blue-900/30 backdrop-blur-xl p-10 shadow-2xl">
@@ -31,10 +31,10 @@ export default function LandingPageScreen({ setStateOfPlayer }: LandingPageProps
                     <div className="absolute inset-0 z-0 h-full w-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
                 </button>
             </div>
-
+            {/* 
             <div className="absolute bottom-8 text-center text-sm font-medium text-blue-200/30 tracking-widest uppercase">
                 <p>Made for epic game nights</p>
-            </div>
+            </div> */}
         </div>
     );
 }
