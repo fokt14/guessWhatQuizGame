@@ -46,7 +46,7 @@ export default function GameScreen({ currentQuestion, onAnswerSubmitted, hasAlre
         "border-red-700 bg-red-500 hover:bg-red-400 focus:ring-red-400",
         "border-blue-700 bg-blue-500 hover:bg-blue-400 focus:ring-blue-400",
         "border-amber-700 bg-amber-500 hover:bg-amber-400 focus:ring-amber-400",
-        "border-emerald-700 bg-emerald-500 hover:bg-emerald-400 focus:ring-emerald-400"
+        "border-emerald-700 bg-emerald-900 hover:bg-emerald-600 focus:ring-emerald-400"
     ];
 
     return (

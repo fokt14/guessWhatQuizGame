@@ -14,7 +14,7 @@ export default function LandingPageScreen({ setStateOfPlayer }: LandingPageProps
                     GuessWhat
                 </h1>
                 <p className="mt-6 text-xl font-bold text-slate-400 sm:text-3xl drop-shadow-[0_2px_4px_rgba(255,255,255,0.3)]">
-                    HAMK TECH EDITION.
+                    HAMK TECH EDITION
                 </p>
             </div>
             <div className="flex w-full max-w-sm flex-col items-center gap-6 rounded-3xl border border-blue-400/20 bg-blue-900/30 backdrop-blur-xl p-10 shadow-2xl">
