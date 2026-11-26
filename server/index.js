@@ -41,7 +41,7 @@ app.use(
 const server = http.createServer(app);
 
 const rooms = {};
-const QUESTION_DURATION_SECONDS = 25;
+const QUESTION_DURATION_SECONDS = 60;
 
 const io = new Server(server, {
   cors: {
@@ -319,7 +319,7 @@ io.on("connection", (socket) => {
 
       const shuffledQuestions = allQuestions.sort(() => 0.5 - Math.random());
 
-      room.questions = shuffledQuestions.slice(0, 14);
+      room.questions = shuffledQuestions.slice(0, 10);
       room.state = "IN_GAME";
       room.currentQuestionIndex = 0;
 
@@ -363,8 +363,8 @@ io.on("connection", (socket) => {
     if (currentQ.correctIndex == data.answerIndex) {
       console.log("CARLADHWA");
 
-      let timeRemaining = Math.max(0, 25000 - timeTaken);
-      let percentageOfTimeTaken = timeRemaining / 25000;
+      let timeRemaining = Math.max(0, 60000 - timeTaken);
+      let percentageOfTimeTaken = timeRemaining / 60000;
       let pointsWon = Math.round(percentageOfTimeTaken * 100);
 
       myPlayer.points += pointsWon;
