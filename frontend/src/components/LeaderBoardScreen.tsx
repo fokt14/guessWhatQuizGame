@@ -125,9 +125,14 @@ export default function LeaderBoardScreen({ myPlayer, playersList, myRole, onNex
                                 All placements
                             </h2>
 
-                            <div className={`mb-6 text-lg font-bold drop-shadow-md sm:text-xl md:text-2xl text-black'}`}>
-                                You are in <span className={isLastQuestion ? 'text-yellow-300' : 'text-blue-600'}> {sortedPlayers.findIndex(player => player.id === myPlayer?.id) + 1}º</span> place with <span className={isLastQuestion ? 'text-yellow-300' : 'text-blue-600'}>{myPlayer?.points} pts</span>
-                            </div>
+
+                            {myPlayer && myPlayer.role !== "HOST" && (
+
+                                <div className={`mb-6 text-lg font-bold drop-shadow-md sm:text-xl md:text-2xl text-black'}`}>
+                                    You are in <span className='text-blue-600'> {sortedPlayers.findIndex(player => player.id === myPlayer?.id) + 1}º</span> place with <span className='text-blue-600'>{myPlayer?.points} pts</span>
+                                </div>
+                            )
+                            }
                         </div>
                     )}
 
