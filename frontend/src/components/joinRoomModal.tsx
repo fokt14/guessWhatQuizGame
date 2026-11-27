@@ -55,7 +55,7 @@ export default function JoinRoomModal({ isOpen, onClose, onJoin, nickname }: Joi
                     />
 
                     <button
-                        className="w-full cursor-pointer rounded-2xl border-b-4 border-emerald-700 bg-emerald-500 p-4 text-xl font-bold text-white shadow-lg transition-all duration-150 hover:bg-emerald-400 active:translate-y-1 active:scale-95"
+                        className="w-full cursor-pointer rounded-2xl border-b-4 border-emerald-700 bg-emerald-900 p-4 text-xl font-bold text-white shadow-lg transition-all duration-150 hover:bg-emerald-400 active:translate-y-1 active:scale-95"
                         onClick={handleJoin}
                     >
                         Join
